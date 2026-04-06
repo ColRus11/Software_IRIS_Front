@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-fontsize="normal">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="msapplication-tap-highlight" content="no">
+    <meta name="description" content="IRIS - Inclusión en Red e Integración Social">
+    <title>IRIS</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Material Icons -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+    <!-- MaterializeCSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css" rel="stylesheet">
+
+    <!-- App CSS -->
+    <link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+
+    <!-- ========== LOGIN PAGE ========== -->
+    <div id="page-login" class="iris-page active">
+        <div class="iris-login">
+            <div class="iris-login__card">
+                <div class="iris-login__logo">
+                    <i class="material-icons" style="font-size: inherit;">hearing</i>
+                </div>
+                <h1 class="iris-login__title">IRIS</h1>
+                <p class="iris-login__subtitle">Inclusión en Red e Integración Social</p>
+
+                <div id="login-error" class="iris-login__error"></div>
+
+                <form id="login-form" class="iris-login__form" autocomplete="off">
+                    <div class="iris-login__input-group">
+                        <i class="material-icons iris-login__input-icon">email</i>
+                        <input type="email" id="login-email" class="iris-login__input"
+                               placeholder="Correo electrónico" required
+                               aria-label="Correo electrónico">
+                    </div>
+                    <div class="iris-login__input-group">
+                        <i class="material-icons iris-login__input-icon">lock</i>
+                        <input type="password" id="login-password" class="iris-login__input"
+                               placeholder="Contraseña" required
+                               aria-label="Contraseña" minlength="6">
+                    </div>
+                    <button type="submit" id="login-submit" class="iris-btn iris-btn--primary">
+                        <i class="material-icons">login</i>
+                        <span id="login-btn-text">Iniciar Sesión</span>
+                    </button>
+                </form>
+
+                <button id="login-toggle" class="iris-login__toggle">
+                    ¿No tienes cuenta? Regístrate
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========== APP SHELL (authenticated) ========== -->
+    <div id="app-shell" class="iris-hidden">
+
+        <!-- Navbar -->
+        <nav class="iris-navbar">
+            <div class="iris-navbar__title">
+                <i class="material-icons">hearing</i>
+                <span id="navbar-title">IRIS</span>
+            </div>
+            <div class="iris-navbar__actions">
+                <button id="btn-stop-tts" class="iris-navbar__btn iris-hidden"
+                        title="Detener voz" aria-label="Detener reproducción de voz">
+                    <i class="material-icons">stop</i>
+                </button>
+                <button id="btn-settings" class="iris-navbar__btn"
+                        title="Configuración" aria-label="Abrir configuración">
+                    <i class="material-icons">settings</i>
+                </button>
+                <button id="btn-logout" class="iris-navbar__btn"
+                        title="Cerrar sesión" aria-label="Cerrar sesión">
+                    <i class="material-icons">logout</i>
+                </button>
+            </div>
+        </nav>
+
+        <!-- ===== PAGE: Dashboard ===== -->
+        <div id="page-home" class="iris-page active">
+            <div class="iris-content">
+                <div class="iris-dashboard">
+                    <a href="#" class="iris-dashboard__card" id="nav-questions" role="button" tabindex="0">
+                        <div class="iris-dashboard__icon iris-dashboard__icon--accent">
+                            <i class="material-icons">record_voice_over</i>
+                        </div>
+                        <span class="iris-dashboard__label">Preguntar con Voz</span>
+                    </a>
+                    <a href="#" class="iris-dashboard__card" id="nav-history" role="button" tabindex="0">
+                        <div class="iris-dashboard__icon">
+                            <i class="material-icons">history</i>
+                        </div>
+                        <span class="iris-dashboard__label">Historial</span>
+                    </a>
+                    <a href="#" class="iris-dashboard__card" id="nav-transcription" role="button" tabindex="0"
+                       style="opacity:0.4; pointer-events:none;">
+                        <div class="iris-dashboard__icon iris-dashboard__icon--success">
+                            <i class="material-icons">subtitles</i>
+                        </div>
+                        <span class="iris-dashboard__label">Clase en Vivo</span>
+                    </a>
+                    <a href="#" class="iris-dashboard__card" id="nav-alerts" role="button" tabindex="0"
+                       style="opacity:0.4; pointer-events:none;">
+                        <div class="iris-dashboard__icon iris-dashboard__icon--warning">
+                            <i class="material-icons">warning</i>
+                        </div>
+                        <span class="iris-dashboard__label">Emergencias</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== PAGE: Preguntas con Voz (Épica #2) ===== -->
+        <div id="page-questions" class="iris-page">
+            <div class="iris-content iris-questions">
+                <!-- Formulario de pregunta -->
+                <div class="iris-question-form">
+                    <label class="iris-question-form__label" for="question-text">
+                        <i class="material-icons" style="vertical-align: middle; margin-right: 4px;">edit</i>
+                        Escribe tu pregunta
+                    </label>
+                    <textarea id="question-text"
+                              class="iris-question-form__textarea"
+                              placeholder="Escribe aquí la pregunta que deseas que el profesor escuche..."
+                              aria-label="Escribe tu pregunta"
+                              rows="4"></textarea>
+
+                    <div class="iris-question-form__session">
+                        <input type="text" id="session-name"
+                               class="iris-question-form__session-input"
+                               placeholder="Nombre de la clase (opcional)"
+                               aria-label="Nombre de la sesión o clase">
+                    </div>
+
+                    <!-- Voice selector -->
+                    <div class="iris-voice-selector">
+                        <select id="voice-selector" aria-label="Seleccionar voz">
+                            <option value="">Cargando voces...</option>
+                        </select>
+                    </div>
+
+                    <div class="iris-question-form__actions">
+                        <button id="btn-speak" class="iris-btn iris-btn--accent" disabled>
+                            <i class="material-icons">volume_up</i>
+                            Reproducir
+                        </button>
+                        <button id="btn-save" class="iris-btn iris-btn--primary" disabled>
+                            <i class="material-icons">save</i>
+                            Guardar
+                        </button>
+                    </div>
+                </div>
+
+                <!-- TTS Indicator (vúmetro) -->
+                <div id="tts-indicator" class="iris-tts-indicator">
+                    <div class="iris-tts-indicator__bar"></div>
+                    <div class="iris-tts-indicator__bar"></div>
+                    <div class="iris-tts-indicator__bar"></div>
+                    <div class="iris-tts-indicator__bar"></div>
+                    <div class="iris-tts-indicator__bar"></div>
+                    <div class="iris-tts-indicator__bar"></div>
+                    <div class="iris-tts-indicator__bar"></div>
+                    <div class="iris-tts-indicator__bar"></div>
+                    <div class="iris-tts-indicator__bar"></div>
+                    <span class="iris-tts-indicator__label">Reproduciendo...</span>
+                </div>
+
+                <!-- Recent questions from this session -->
+                <div class="iris-section-header iris-mt-16">
+                    <i class="material-icons">forum</i>
+                    Preguntas de esta sesión
+                </div>
+                <ul id="session-questions" class="iris-history__list">
+                    <!-- Populated dynamically -->
+                </ul>
+                <div id="session-empty" class="iris-history__empty">
+                    <i class="material-icons">chat_bubble_outline</i>
+                    Aún no has hecho preguntas en esta sesión
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== PAGE: Historial ===== -->
+        <div id="page-history" class="iris-page">
+            <div class="iris-content iris-history">
+                <div class="iris-section-header">
+                    <i class="material-icons">history</i>
+                    Historial de Preguntas
+                </div>
+
+                <div class="iris-filter-bar">
+                    <input type="text" id="history-search" placeholder="Buscar pregunta..."
+                           aria-label="Buscar en historial">
+                </div>
+
+                <ul id="history-list" class="iris-history__list">
+                    <!-- Populated dynamically -->
+                </ul>
+                <div id="history-empty" class="iris-history__empty">
+                    <i class="material-icons">inventory_2</i>
+                    No hay preguntas en el historial
+                </div>
+                <div id="history-loading" class="iris-loading iris-hidden">
+                    <div class="iris-spinner"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== PAGE: Settings ===== -->
+        <div id="page-settings" class="iris-page">
+            <div class="iris-content iris-settings">
+                <div class="iris-section-header">
+                    <i class="material-icons">settings</i>
+                    Configuración
+                </div>
+
+                <div class="iris-settings__group">
+                    <div class="iris-settings__group-title">
+                        <i class="material-icons">palette</i>
+                        Apariencia
+                    </div>
+                    <div class="iris-settings__option">
+                        <span class="iris-settings__option-label">Modo oscuro</span>
+                        <label class="iris-toggle">
+                            <input type="checkbox" id="toggle-dark-mode">
+                            <span class="iris-toggle__slider"></span>
+                        </label>
+                    </div>
+                    <div class="iris-settings__option">
+                        <span class="iris-settings__option-label">Tamaño de fuente</span>
+                        <div class="iris-fontsize-selector">
+                            <button class="iris-fontsize-btn active" data-size="normal">A</button>
+                            <button class="iris-fontsize-btn" data-size="large" style="font-size:1.1em;">A</button>
+                            <button class="iris-fontsize-btn" data-size="xlarge" style="font-size:1.3em;">A</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="iris-settings__group">
+                    <div class="iris-settings__group-title">
+                        <i class="material-icons">record_voice_over</i>
+                        Voz Sintética
+                    </div>
+                    <div class="iris-settings__option">
+                        <span class="iris-settings__option-label">Velocidad de voz</span>
+                        <div style="display:flex; align-items:center; gap:8px;">
+                            <input type="range" id="voice-rate" min="0.5" max="2" step="0.1" value="1"
+                                   style="width:100px;" aria-label="Velocidad de voz">
+                            <span id="voice-rate-label">1.0x</span>
+                        </div>
+                    </div>
+                    <div class="iris-settings__option">
+                        <span class="iris-settings__option-label">Tono de voz</span>
+                        <div style="display:flex; align-items:center; gap:8px;">
+                            <input type="range" id="voice-pitch" min="0.5" max="2" step="0.1" value="1"
+                                   style="width:100px;" aria-label="Tono de voz">
+                            <span id="voice-pitch-label">1.0</span>
+                        </div>
+                    </div>
+                    <div class="iris-settings__option">
+                        <button id="btn-test-voice" class="iris-btn iris-btn--outline iris-btn--small">
+                            <i class="material-icons">volume_up</i>
+                            Probar voz
+                        </button>
+                    </div>
+                </div>
+
+                <div class="iris-settings__group">
+                    <div class="iris-settings__group-title">
+                        <i class="material-icons">person</i>
+                        Cuenta
+                    </div>
+                    <div class="iris-settings__option">
+                        <span class="iris-settings__option-label" id="settings-email">usuario@ejemplo.com</span>
+                    </div>
+                    <div class="iris-settings__option">
+                        <button id="btn-logout-settings" class="iris-btn iris-btn--outline iris-btn--small" style="color: var(--iris-error); border-color: var(--iris-error);">
+                            <i class="material-icons">logout</i>
+                            Cerrar Sesión
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom Navigation -->
+        <nav class="iris-bottom-nav">
+            <button class="iris-bottom-nav__item active" data-page="home" aria-label="Inicio">
+                <i class="material-icons">home</i>
+                <span>Inicio</span>
+            </button>
+            <button class="iris-bottom-nav__item" data-page="questions" aria-label="Preguntas">
+                <i class="material-icons">record_voice_over</i>
+                <span>Preguntar</span>
+            </button>
+            <button class="iris-bottom-nav__item" data-page="history" aria-label="Historial">
+                <i class="material-icons">history</i>
+                <span>Historial</span>
+            </button>
+            <button class="iris-bottom-nav__item" data-page="settings" aria-label="Ajustes">
+                <i class="material-icons">settings</i>
+                <span>Ajustes</span>
+            </button>
+        </nav>
+
+    </div><!-- /app-shell -->
+
+    <!-- Toast notification -->
+    <div id="toast" class="iris-toast"></div>
+
+    <!-- MaterializeCSS JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+
+    <!-- Firebase SDK (compat for simplicity) -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+
+    <!-- App JS Modules -->
+    <script src="js/config.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/tts.js"></script>
+    <script src="js/questions.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
