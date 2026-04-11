@@ -14,6 +14,7 @@ const IrisApp = {
         IrisAuth.init();
         IrisTTS.init();
         IrisQuestions.init();
+        IrisVideos.init();
 
         // Configurar navegación
         this._setupNavigation();
@@ -60,6 +61,7 @@ const IrisApp = {
         const navMap = {
             'nav-questions': 'questions',
             'nav-history': 'history',
+            'nav-videos': 'videos',
         };
 
         Object.entries(navMap).forEach(([id, page]) => {
@@ -101,6 +103,7 @@ const IrisApp = {
             'home': 'IRIS',
             'questions': 'Preguntar con Voz',
             'history': 'Historial',
+            'videos': 'Videos y Subtítulos',
             'settings': 'Configuración',
         };
         const navTitle = document.getElementById('navbar-title');
@@ -109,6 +112,9 @@ const IrisApp = {
         // Acciones específicas por página
         if (page === 'history') {
             IrisQuestions.loadHistory();
+        }
+        if (page === 'videos') {
+            IrisVideos.loadVideos();
         }
     },
 

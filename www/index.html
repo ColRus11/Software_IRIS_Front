@@ -103,12 +103,11 @@
                         </div>
                         <span class="iris-dashboard__label">Historial</span>
                     </a>
-                    <a href="#" class="iris-dashboard__card" id="nav-transcription" role="button" tabindex="0"
-                       style="opacity:0.4; pointer-events:none;">
+                    <a href="#" class="iris-dashboard__card" id="nav-videos" role="button" tabindex="0">
                         <div class="iris-dashboard__icon iris-dashboard__icon--success">
-                            <i class="material-icons">subtitles</i>
+                            <i class="material-icons">video_library</i>
                         </div>
-                        <span class="iris-dashboard__label">Clase en Vivo</span>
+                        <span class="iris-dashboard__label">Videos y Subtítulos</span>
                     </a>
                     <a href="#" class="iris-dashboard__card" id="nav-alerts" role="button" tabindex="0"
                        style="opacity:0.4; pointer-events:none;">
@@ -217,6 +216,60 @@
             </div>
         </div>
 
+        <!-- ===== PAGE: Videos y Subtítulos (SCRUM-38) ===== -->
+        <div id="page-videos" class="iris-page">
+            <div class="iris-content">
+                <div id="video-list-section">
+                    <div class="iris-section-header">
+                        <i class="material-icons">video_library</i>
+                        Videos y Subtítulos
+                    </div>
+
+                    <!-- Upload Form -->
+                    <form id="video-upload-form" class="iris-video-upload">
+                        <input type="text" id="video-title" class="iris-video-upload__input"
+                               placeholder="Título del video" required
+                               aria-label="Título del video">
+
+                        <div class="iris-video-upload__file">
+                            <label for="video-file-input" class="iris-btn iris-btn--outline iris-btn--small">
+                                <i class="material-icons">attach_file</i>
+                                <span id="video-file-label">Seleccionar archivo</span>
+                            </label>
+                            <input type="file" id="video-file-input"
+                                   accept=".mp4,.webm,.mov,.avi,.mp3,.wav,.ogg,.m4a"
+                                   style="display:none" required>
+                        </div>
+
+                        <div class="iris-video-upload__row">
+                            <select id="video-language" aria-label="Idioma del audio">
+                                <option value="es" selected>Español</option>
+                                <option value="en">Inglés</option>
+                                <option value="pt">Portugués</option>
+                                <option value="fr">Francés</option>
+                            </select>
+                            <button type="submit" id="video-upload-btn" class="iris-btn iris-btn--primary">
+                                <i class="material-icons">cloud_upload</i> Subir Video
+                            </button>
+                        </div>
+                    </form>
+
+                    <!-- Video List -->
+                    <div id="video-list"></div>
+                    <div id="video-empty" class="iris-history__empty">
+                        <i class="material-icons">videocam_off</i>
+                        <span>No hay videos subidos aún</span>
+                    </div>
+                    <div id="video-loading" class="iris-loading iris-hidden">
+                        <div class="iris-spinner"></div>
+                    </div>
+                </div>
+
+                <!-- Video Detail (subtitles view) -->
+                <div id="video-detail" class="iris-hidden"></div>
+            </div>
+        </div>
+
         <!-- ===== PAGE: Settings ===== -->
         <div id="page-settings" class="iris-page">
             <div class="iris-content iris-settings">
@@ -308,6 +361,10 @@
                 <i class="material-icons">history</i>
                 <span>Historial</span>
             </button>
+            <button class="iris-bottom-nav__item" data-page="videos" aria-label="Videos">
+                <i class="material-icons">video_library</i>
+                <span>Videos</span>
+            </button>
             <button class="iris-bottom-nav__item" data-page="settings" aria-label="Ajustes">
                 <i class="material-icons">settings</i>
                 <span>Ajustes</span>
@@ -332,6 +389,7 @@
     <script src="js/auth.js"></script>
     <script src="js/tts.js"></script>
     <script src="js/questions.js"></script>
+    <script src="js/videos.js"></script>
     <script src="js/app.js"></script>
 </body>
 </html>
