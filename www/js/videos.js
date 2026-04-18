@@ -29,8 +29,8 @@ const IrisVideos = {
 
                 // Validar tamaño
                 const file = e.target.files[0];
-                if (file && file.size > 25 * 1024 * 1024) {
-                    IrisApp.showToast('⚠️ El archivo es muy grande (máx 25 MB)');
+                if (file && file.size > 500 * 1024 * 1024) {
+                    IrisApp.showToast('⚠️ El archivo es muy grande (máx 500 MB)');
                     fileInput.value = '';
                     label.textContent = 'Seleccionar archivo';
                 }
