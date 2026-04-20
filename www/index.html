@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>IRIS - Grabador de Audio</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: sans-serif;
+      background: #f0f0f0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .card {
+      background: white;
+      border-radius: 16px;
+      padding: 40px;
+      text-align: center;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+      width: 300px;
+    }
+
+    h1 { font-size: 24px; margin-bottom: 8px; color: #222; }
+    p  { font-size: 14px; color: #888; margin-bottom: 32px; }
+
+    .status {
+      font-size: 13px;
+      padding: 8px 16px;
+      border-radius: 20px;
+      margin-bottom: 24px;
+      font-weight: bold;
+      background: #eee;
+      color: #555;
+    }
+    .status.grabando { background: #ffe0e0; color: #c00; }
+
+    .btn {
+      width: 100%;
+      padding: 14px;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+      cursor: pointer;
+      margin-bottom: 12px;
+      transition: opacity 0.2s;
+    }
+    .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    #btnGrabar  { background: #e53935; color: white; }
+    #btnDetener { background: #333;    color: white; }
+
+    .ruta {
+      margin-top: 20px;
+      font-size: 11px;
+      color: #aaa;
+      word-break: break-all;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="card">
+    <h1>🎙 IRIS</h1>
+    <p>Grabador de audio</p>
+
+    <div class="status" id="status">En espera</div>
+
+    <button class="btn" id="btnGrabar"  onclick="startRecording()">⏺ Grabar</button>
+    <button class="btn" id="btnDetener" onclick="stopRecording()" disabled>⏹ Detener</button>
+
+    <div class="ruta" id="ruta"></div>
+  </div>
+
+  <script src="cordova.js"></script>
+  <script>
+    var mediaRec = null;
+    var recordingFilePath = null;
+
+    document.addEventListener('deviceready', function () {
+      setStatus('Listo para grabar', false);
+    }, false);
+
+    function getRecordingPath() {
+      var fileName = 'recording_' + Date.now() + '.wav';
+      if (device.platform === 'Android') {
+        return cordova.file.externalDataDirectory + fileName;
+      } else {
+        return cordova.file.documentsDirectory + fileName;
+      }
+    }
+
+    function startRecording() {
+      recordingFilePath = getRecordingPath();
+
+      mediaRec = new Media(
+        recordingFilePath,
+        function () { console.log('Media OK'); },
+        function (err) {
+          setStatus('Error: ' + err.message, false);
+          console.error('Error Media:', err);
+        }
+      );
+
+      mediaRec.startRecord();
+      setStatus('🔴 Grabando...', true);
+      document.getElementById('btnGrabar').disabled  = true;
+      document.getElementById('btnDetener').disabled = false;
+      document.getElementById('ruta').textContent = '';
+    }
+
+    function stopRecording() {
+      if (!mediaRec) return;
+
+      mediaRec.stopRecord();
+      mediaRec.release();
+      mediaRec = null;
+
+      setStatus('✅ Grabación guardada', false);
+      document.getElementById('btnGrabar').disabled  = false;
+      document.getElementById('btnDetener').disabled = true;
+      document.getElementById('ruta').textContent = '📁 ' + recordingFilePath;
+    }
+
+    function setStatus(msg, grabando) {
+      var el = document.getElementById('status');
+      el.textContent = msg;
+      el.className = 'status' + (grabando ? ' grabando' : '');
+    }
+  </script>
+</body>
+</html>
