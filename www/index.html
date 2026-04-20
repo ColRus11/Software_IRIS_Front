@@ -78,58 +78,120 @@
 
   <script src="cordova.js"></script>
   <script>
-    var mediaRec = null;
-    var recordingFilePath = null;
+    // ─── Estado ───────────────────────────────────────────
+    var esCordova     = false;
+    var mediaRec      = null;   // Cordova Media object
+    var mediaRecorder = null;   // Web MediaRecorder object
+    var audioChunks   = [];
+    var recordingPath = null;
 
+    // ─── Init ─────────────────────────────────────────────
+    // Si Cordova está disponible, espera deviceready
     document.addEventListener('deviceready', function () {
-      setStatus('Listo para grabar', false);
+      esCordova = true;
+      setStatus('Listo para grabar (dispositivo)', false);
     }, false);
 
-    function getRecordingPath() {
-      var fileName = 'recording_' + Date.now() + '.wav';
-      if (device.platform === 'Android') {
-        return cordova.file.externalDataDirectory + fileName;
-      } else {
-        return cordova.file.documentsDirectory + fileName;
+    // Si no hay deviceready en 1 segundo, asume navegador
+    setTimeout(function () {
+      if (!esCordova) {
+        setStatus('Listo para grabar (navegador)', false);
       }
+    }, 1000);
+
+    // ─── Grabar ───────────────────────────────────────────
+    function startRecording() {
+      if (esCordova) {
+        startCordova();
+      } else {
+        startWeb();
+      }
+      document.getElementById('btnGrabar').disabled  = true;
+      document.getElementById('btnDetener').disabled = false;
+      document.getElementById('ruta').textContent    = '';
     }
 
-    function startRecording() {
-      recordingFilePath = getRecordingPath();
+    function stopRecording() {
+      if (esCordova) {
+        stopCordova();
+      } else {
+        stopWeb();
+      }
+      document.getElementById('btnGrabar').disabled  = false;
+      document.getElementById('btnDetener').disabled = true;
+    }
+
+    // ─── Cordova (dispositivo) ────────────────────────────
+    function startCordova() {
+      var fileName = 'recording_' + Date.now() + '.wav';
+      recordingPath = (typeof device !== 'undefined' && device.platform === 'Android')
+        ? cordova.file.externalDataDirectory + fileName
+        : cordova.file.documentsDirectory + fileName;
 
       mediaRec = new Media(
-        recordingFilePath,
+        recordingPath,
         function () { console.log('Media OK'); },
-        function (err) {
-          setStatus('Error: ' + err.message, false);
-          console.error('Error Media:', err);
-        }
+        function (err) { setStatus('Error: ' + err.message, false); }
       );
 
       mediaRec.startRecord();
       setStatus('🔴 Grabando...', true);
-      document.getElementById('btnGrabar').disabled  = true;
-      document.getElementById('btnDetener').disabled = false;
-      document.getElementById('ruta').textContent = '';
     }
 
-    function stopRecording() {
+    function stopCordova() {
       if (!mediaRec) return;
-
       mediaRec.stopRecord();
       mediaRec.release();
       mediaRec = null;
-
-      setStatus('✅ Grabación guardada', false);
-      document.getElementById('btnGrabar').disabled  = false;
-      document.getElementById('btnDetener').disabled = true;
-      document.getElementById('ruta').textContent = '📁 ' + recordingFilePath;
+      setStatus('✅ Guardado', false);
+      document.getElementById('ruta').textContent = '📁 ' + recordingPath;
     }
 
+    // ─── Web MediaRecorder (navegador) ────────────────────
+    function startWeb() {
+      navigator.mediaDevices.getUserMedia({ audio: true })
+        .then(function (stream) {
+          audioChunks  = [];
+          mediaRecorder = new MediaRecorder(stream);
+
+          mediaRecorder.ondataavailable = function (e) {
+            if (e.data.size > 0) audioChunks.push(e.data);
+          };
+
+          mediaRecorder.onstop = function () {
+            var blob = new Blob(audioChunks, { type: 'audio/wav' });
+            var url  = URL.createObjectURL(blob);
+
+            var a = document.createElement('a');
+            a.href     = url;
+            a.download = 'recording_' + Date.now() + '.wav';
+            a.click();
+
+            setStatus('✅ Descargado', false);
+            document.getElementById('ruta').textContent = '📁 archivo descargado';
+          };
+
+          mediaRecorder.start();
+          setStatus('🔴 Grabando...', true);
+        })
+        .catch(function (err) {
+          setStatus('Error micrófono: ' + err.message, false);
+          document.getElementById('btnGrabar').disabled  = false;
+          document.getElementById('btnDetener').disabled = true;
+        });
+    }
+
+    function stopWeb() {
+      if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+        mediaRecorder.stop();
+      }
+    }
+
+    // ─── Helpers ──────────────────────────────────────────
     function setStatus(msg, grabando) {
       var el = document.getElementById('status');
       el.textContent = msg;
-      el.className = 'status' + (grabando ? ' grabando' : '');
+      el.className   = 'status' + (grabando ? ' grabando' : '');
     }
   </script>
 </body>
