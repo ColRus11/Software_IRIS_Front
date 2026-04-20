@@ -1,0 +1,30 @@
+<?xml version='1.0' encoding='utf-8'?>
+<widget id="com.tuempresa.iris" version="1.0.0"
+  xmlns="http://www.w3.org/ns/widgets"
+  xmlns:cdv="http://cordova.apache.org/ns/1.0">
+
+  <name>IRIS</name>
+  <description>Aplicación IRIS</description>
+  <author email="tu@email.com" href="http://tuempresa.com">Tu Nombre</author>
+
+  <content src="index.html" />
+  <access origin="*" />
+
+  <allow-intent href="http://*/*" />
+  <allow-intent href="https://*/*" />
+
+  <!-- Android -->
+  <platform name="android">
+    <uses-permission android:name="android.permission.RECORD_AUDIO"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+  </platform>
+
+  <!-- iOS -->
+  <platform name="ios">
+    <edit-config file="*-Info.plist" mode="merge" target="NSMicrophoneUsageDescription">
+      <string>Se necesita el micrófono para grabar audio.</string>
+    </edit-config>
+  </platform>
+
+</widget>
