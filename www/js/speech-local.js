@@ -19,21 +19,21 @@
 
 var SpeechLocal = (function () {
 
-  var reconocedor = null;
-  var activo = false;
+  var reconocedor  = null;
+  var activo       = false;
   var _onResultado = null;
-  var _onError = null;
+  var _onError     = null;
 
   function estaDisponible() {
     return !!(window.SpeechRecognition || window.webkitSpeechRecognition);
   }
 
   function _crear() {
-    var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    var SR  = window.SpeechRecognition || window.webkitSpeechRecognition;
     reconocedor = new SR();
 
-    reconocedor.lang = 'es-CO';
-    reconocedor.continuous = true;
+    reconocedor.lang           = 'es-CO';
+    reconocedor.continuous     = true;
     reconocedor.interimResults = true;
     reconocedor.maxAlternatives = 1;
 
@@ -51,7 +51,7 @@ var SpeechLocal = (function () {
 
     reconocedor.onresult = function (event) {
       var textoParcial = '';
-      var textoFinal = '';
+      var textoFinal   = '';
 
       for (var i = event.resultIndex; i < event.results.length; i++) {
         var t = event.results[i][0].transcript;
@@ -64,9 +64,9 @@ var SpeechLocal = (function () {
 
       if (_onResultado) {
         _onResultado({
-          parcial: textoParcial,
-          final: textoFinal,
-          esFinal: textoFinal !== ''
+          parcial : textoParcial,
+          final   : textoFinal,
+          esFinal : textoFinal !== ''
         });
       }
     };
@@ -77,11 +77,11 @@ var SpeechLocal = (function () {
 
     reconocedor.onerror = function (event) {
       var mensajes = {
-        'no-speech': 'No se detectó voz. Habla más cerca del micrófono.',
-        'audio-capture': 'No se pudo acceder al micrófono.',
-        'not-allowed': 'Permiso de micrófono denegado. Revisa los permisos del navegador.',
-        'network': 'Error de red.',
-        'aborted': 'Reconocimiento cancelado.',
+        'no-speech'          : 'No se detectó voz. Habla más cerca del micrófono.',
+        'audio-capture'      : 'No se pudo acceder al micrófono.',
+        'not-allowed'        : 'Permiso de micrófono denegado. Revisa los permisos del navegador.',
+        'network'            : 'Error de red.',
+        'aborted'            : 'Reconocimiento cancelado.',
         'service-not-allowed': 'Servicio no permitido. Usa localhost o HTTPS.'
       };
       var msg = mensajes[event.error] || ('Error desconocido: ' + event.error);
@@ -116,8 +116,8 @@ var SpeechLocal = (function () {
     }
 
     _onResultado = onResultado;
-    _onError = onError;
-    activo = true;
+    _onError     = onError;
+    activo       = true;
 
     _crear();
 
@@ -133,12 +133,12 @@ var SpeechLocal = (function () {
   function stop() {
     activo = false;
     if (reconocedor) {
-      try { reconocedor.stop(); } catch (e) { }
+      try { reconocedor.stop(); } catch(e) {}
       reconocedor = null;
       console.log('[SpeechLocal] Detenido');
     }
   }
 
-  return { start: start, stop: stop, estaDisponible: estaDisponible };
+  return { start, stop, estaDisponible };
 
 })();

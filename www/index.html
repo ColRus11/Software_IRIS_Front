@@ -1,11 +1,16 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>IRIS - Transcripción en Tiempo Real</title>
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
     body {
       font-family: sans-serif;
@@ -22,13 +27,22 @@
       border-radius: 16px;
       padding: 32px;
       text-align: center;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
       width: 100%;
       max-width: 480px;
     }
 
-    h1 { font-size: 24px; margin-bottom: 4px; color: #222; }
-    .subtitle { font-size: 14px; color: #888; margin-bottom: 16px; }
+    h1 {
+      font-size: 24px;
+      margin-bottom: 4px;
+      color: #222;
+    }
+
+    .subtitle {
+      font-size: 14px;
+      color: #888;
+      margin-bottom: 16px;
+    }
 
     .modo-badge {
       font-size: 11px;
@@ -38,9 +52,21 @@
       display: inline-block;
       font-weight: bold;
     }
-    .modo-badge.websocket { background: #d4edda; color: #155724; }
-    .modo-badge.local     { background: #fff3cd; color: #856404; }
-    .modo-badge.inactivo  { background: #eee;    color: #888;    }
+
+    .modo-badge.websocket {
+      background: #d4edda;
+      color: #155724;
+    }
+
+    .modo-badge.local {
+      background: #fff3cd;
+      color: #856404;
+    }
+
+    .modo-badge.inactivo {
+      background: #eee;
+      color: #888;
+    }
 
     .ws-status {
       font-size: 12px;
@@ -50,10 +76,26 @@
       display: inline-block;
       font-weight: bold;
     }
-    .ws-status.desconectado { background: #eee;    color: #888; }
-    .ws-status.conectando   { background: #fff3cd; color: #856404; }
-    .ws-status.conectado    { background: #d4edda; color: #155724; }
-    .ws-status.error        { background: #f8d7da; color: #721c24; }
+
+    .ws-status.desconectado {
+      background: #eee;
+      color: #888;
+    }
+
+    .ws-status.conectando {
+      background: #fff3cd;
+      color: #856404;
+    }
+
+    .ws-status.conectado {
+      background: #d4edda;
+      color: #155724;
+    }
+
+    .ws-status.error {
+      background: #f8d7da;
+      color: #721c24;
+    }
 
     .rec-status {
       font-size: 13px;
@@ -64,7 +106,11 @@
       background: #eee;
       color: #555;
     }
-    .rec-status.grabando { background: #ffe0e0; color: #c00; }
+
+    .rec-status.grabando {
+      background: #ffe0e0;
+      color: #c00;
+    }
 
     /* ── Visualizador de audio ── */
     #audioCanvas {
@@ -86,9 +132,21 @@
       margin-bottom: 12px;
       transition: opacity 0.2s;
     }
-    .btn:disabled { opacity: 0.4; cursor: not-allowed; }
-    #btnGrabar  { background: #e53935; color: white; }
-    #btnDetener { background: #333;    color: white; }
+
+    .btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    #btnGrabar {
+      background: #e53935;
+      color: white;
+    }
+
+    #btnDetener {
+      background: #333;
+      color: white;
+    }
 
     .transcripcion-label {
       font-size: 12px;
@@ -113,9 +171,16 @@
       white-space: pre-wrap;
       word-break: break-word;
     }
-    #transcripcion.vacio { color: #bbb; font-style: italic; }
 
-    #textoParcial { color: #aaa; font-style: italic; }
+    #transcripcion.vacio {
+      color: #bbb;
+      font-style: italic;
+    }
+
+    #textoParcial {
+      color: #aaa;
+      font-style: italic;
+    }
 
     .btn-limpiar {
       margin-top: 8px;
@@ -126,9 +191,13 @@
       cursor: pointer;
       text-decoration: underline;
     }
-    .btn-limpiar:hover { color: #555; }
+
+    .btn-limpiar:hover {
+      color: #555;
+    }
   </style>
 </head>
+
 <body>
   <div class="card">
     <h1>🎙 IRIS</h1>
@@ -141,11 +210,12 @@
     <!-- Visualizador de audio -->
     <canvas id="audioCanvas"></canvas>
 
-    <button class="btn" id="btnGrabar"  onclick="startRecording()">⏺ Grabar</button>
+    <button class="btn" id="btnGrabar" onclick="startRecording()">⏺ Grabar</button>
     <button class="btn" id="btnDetener" onclick="stopRecording()" disabled>⏹ Detener</button>
 
     <div class="transcripcion-label">Transcripción:</div>
-    <div id="transcripcion" class="vacio">El texto aparecerá aquí mientras hablas...<span id="textoParcial"></span></div>
+    <div id="transcripcion" class="vacio">El texto aparecerá aquí mientras hablas...<span id="textoParcial"></span>
+    </div>
     <button class="btn-limpiar" onclick="limpiarTranscripcion()">Limpiar</button>
   </div>
 
@@ -154,37 +224,37 @@
   <script>
 
     // ─── Configuración ─────────────────────────────────────
-    var WS_URL      = 'ws://localhost:8765';
+    var WS_URL = 'ws://localhost:8765';
     var FRAGMENT_MS = 3000;
-    var WS_TIMEOUT  = 4000;
+    var WS_TIMEOUT = 4000;
 
     // ─── Estado ────────────────────────────────────────────
-    var esCordova      = false;
-    var modoActual     = null;
-    var mediaRecorder  = null;
-    var socket         = null;
-    var textoFinal     = '';
+    var esCordova = false;
+    var modoActual = null;
+    var mediaRecorder = null;
+    var socket = null;
+    var textoFinal = '';
 
     // ─── Visualizador ──────────────────────────────────────
-    var audioCtx      = null;
-    var analyser      = null;
-    var animFrameId   = null;
-    var visualStream  = null;
+    var audioCtx = null;
+    var analyser = null;
+    var animFrameId = null;
+    var visualStream = null;
 
-    var canvas  = document.getElementById('audioCanvas');
+    var canvas = document.getElementById('audioCanvas');
     var canvasCtx = canvas.getContext('2d');
 
     function iniciarVisualizador(stream) {
       visualStream = stream;
-      audioCtx  = new (window.AudioContext || window.webkitAudioContext)();
-      analyser  = audioCtx.createAnalyser();
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      analyser = audioCtx.createAnalyser();
       analyser.fftSize = 256;
 
       var source = audioCtx.createMediaStreamSource(stream);
       source.connect(analyser);
 
       var bufferLength = analyser.frequencyBinCount;
-      var dataArray    = new Uint8Array(bufferLength);
+      var dataArray = new Uint8Array(bufferLength);
 
       function draw() {
         animFrameId = requestAnimationFrame(draw);
@@ -192,7 +262,7 @@
 
         var W = canvas.offsetWidth;
         var H = canvas.offsetHeight;
-        canvas.width  = W;
+        canvas.width = W;
         canvas.height = H;
 
         canvasCtx.clearRect(0, 0, W, H);
@@ -216,12 +286,12 @@
 
     function detenerVisualizador() {
       if (animFrameId) { cancelAnimationFrame(animFrameId); animFrameId = null; }
-      if (audioCtx)    { audioCtx.close(); audioCtx = null; }
+      if (audioCtx) { audioCtx.close(); audioCtx = null; }
 
       // Canvas en silencio
       var W = canvas.offsetWidth || 400;
       var H = canvas.offsetHeight || 56;
-      canvas.width  = W;
+      canvas.width = W;
       canvas.height = H;
       canvasCtx.fillStyle = '#1a1a2e';
       canvasCtx.fillRect(0, 0, W, H);
@@ -241,7 +311,7 @@
 
     // ─── Grabar ────────────────────────────────────────────
     function startRecording() {
-      document.getElementById('btnGrabar').disabled  = true;
+      document.getElementById('btnGrabar').disabled = true;
       document.getElementById('btnDetener').disabled = false;
 
       intentarWebSocket(function (conectado) {
@@ -256,14 +326,28 @@
     }
 
     function stopRecording() {
-      pararTodo();
-      document.getElementById('btnGrabar').disabled  = false;
+      // Para la grabación pero NO cierra el WebSocket todavía
+      if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+        mediaRecorder.stop();
+        mediaRecorder = null;
+      }
+      SpeechLocal.stop();
+      detenerVisualizador();
+      setRecStatus('⏳ Transcribiendo...', false);
+      document.getElementById('btnGrabar').disabled = false;
       document.getElementById('btnDetener').disabled = true;
       setModo(null);
+
+      // Cierra el WebSocket después de 3 segundos
+      // dándole tiempo al back de responder
+      setTimeout(function () {
+        if (socket) { socket.close(); socket = null; }
+        setWsStatus('desconectado', '⚪ WebSocket sin conectar');
+      }, 3000);
     }
 
     function pararTodo() {
-      if (socket)       { socket.close(); socket = null; }
+      if (socket) { socket.close(); socket = null; }
       if (mediaRecorder && mediaRecorder.state !== 'inactive') {
         mediaRecorder.stop(); mediaRecorder = null;
       }
@@ -354,12 +438,12 @@
       var fileName = 'recording_' + Date.now() + '.wav';
       var filePath = cordova.file.documentsDirectory + fileName;
       var mediaRec = new Media(filePath,
-        function () {},
+        function () { },
         function (err) { setRecStatus('Error: ' + err.message, false); }
       );
       mediaRec.startRecord();
       setRecStatus('🔴 Grabando (back)...', true);
-      window._cordovaMedia    = mediaRec;
+      window._cordovaMedia = mediaRec;
       window._cordovaFilePath = filePath;
     }
 
@@ -367,7 +451,7 @@
     function startLocal() {
       if (!SpeechLocal.estaDisponible()) {
         setRecStatus('Speech API no disponible en este navegador', false);
-        document.getElementById('btnGrabar').disabled  = false;
+        document.getElementById('btnGrabar').disabled = false;
         document.getElementById('btnDetener').disabled = true;
         setModo(null);
         return;
@@ -436,28 +520,29 @@
       var el = document.getElementById('modoBadge');
       if (modo === 'websocket') {
         el.textContent = '🟢 Modo: Backend';
-        el.className   = 'modo-badge websocket';
+        el.className = 'modo-badge websocket';
       } else if (modo === 'local') {
         el.textContent = '🟡 Modo: Local (sin back)';
-        el.className   = 'modo-badge local';
+        el.className = 'modo-badge local';
       } else {
         el.textContent = '⚪ Sin modo';
-        el.className   = 'modo-badge inactivo';
+        el.className = 'modo-badge inactivo';
       }
     }
 
     function setRecStatus(msg, grabando) {
       var el = document.getElementById('recStatus');
       el.textContent = msg;
-      el.className   = 'rec-status' + (grabando ? ' grabando' : '');
+      el.className = 'rec-status' + (grabando ? ' grabando' : '');
     }
 
     function setWsStatus(tipo, msg) {
       var el = document.getElementById('wsStatus');
       el.textContent = msg;
-      el.className   = 'ws-status ' + tipo;
+      el.className = 'ws-status ' + tipo;
     }
 
   </script>
 </body>
+
 </html>
