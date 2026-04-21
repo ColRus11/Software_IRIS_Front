@@ -326,7 +326,7 @@
     }
 
     function stopRecording() {
-      // Para la grabación pero NO cierra el WebSocket todavía
+      // Para MediaRecorder
       if (mediaRecorder && mediaRecorder.state !== 'inactive') {
         mediaRecorder.stop();
         mediaRecorder = null;
@@ -338,12 +338,20 @@
       document.getElementById('btnDetener').disabled = true;
       setModo(null);
 
-      // Cierra el WebSocket después de 3 segundos
-      // dándole tiempo al back de responder
-      setTimeout(function () {
-        if (socket) { socket.close(); socket = null; }
-        setWsStatus('desconectado', '⚪ WebSocket sin conectar');
-      }, 3000);
+      // Envía señal FIN y espera respuesta antes de cerrar
+      if (socket && socket.readyState === WebSocket.OPEN) {
+        socket.onmessage = function (e) {
+          var texto = e.data;
+          if (texto && texto !== '...') {
+            agregarTextoFinal(texto);
+            setRecStatus('✅ Transcripción lista', false);
+          }
+          socket.close();
+          socket = null;
+          setWsStatus('desconectado', '⚪ WebSocket sin conectar');
+        };
+        socket.send("FIN");
+      }
     }
 
     function pararTodo() {
