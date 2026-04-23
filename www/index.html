@@ -396,7 +396,16 @@
           socket = ws;
           setWsStatus('conectado', '🟢 Conectado al back');
           ws.onmessage = function (e) {
-            if (e.data && e.data.trim()) agregarTextoFinal(e.data);
+            if (!e.data || e.data === '(fin)') return;
+            // Reemplaza texto completo porque cada respuesta es el acumulado
+            textoFinal = e.data.trim() + ' ';
+            var el = document.getElementById('transcripcion');
+            el.classList.remove('vacio');
+            el.textContent = textoFinal;
+            var span = document.createElement('span');
+            span.id = 'textoParcial';
+            el.appendChild(span);
+            el.scrollTop = el.scrollHeight;
           };
           ws.onerror = function () {
             setWsStatus('error', '🔴 Error de conexión');
