@@ -15,8 +15,8 @@ en el enlace:
 probar en simulador, al hacer una modificacion en la carpeta www/, se debe actualizar la carpeta www/ de la plataforma a usar
 actualizar para IOS:
 
-        cordova prepare ios
+    cordova prepare ios
 
 actualizar para android:
 
-        cordova prepare android
+    cordova prepare android
