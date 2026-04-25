@@ -360,9 +360,7 @@
         mediaRecorder.stop(); mediaRecorder = null;
       }
       if (window._cordovaMedia) {
-        window._cordovaMedia.stopRecord();
-        window._cordovaMedia.release();
-        window._cordovaMedia = null;
+        stopCordova();
       }
       SpeechLocal.stop();
       detenerVisualizador();
@@ -450,18 +448,68 @@
         });
     }
 
-    // ─── Modo WebSocket — Cordova ──────────────────────────
+    var _cordovaFilePath = null;
+    var _cordovaMedia = null;
+
+    // Cordova — graba archivo completo
     function startCordova() {
       var fileName = 'recording_' + Date.now() + '.wav';
-      var filePath = cordova.file.documentsDirectory + fileName;
-      var mediaRec = new Media(filePath,
-        function () { },
+      _cordovaFilePath = cordova.file.documentsDirectory + fileName;
+
+      _cordovaMedia = new Media(
+        _cordovaFilePath,
+        function () { console.log('[Cordova] Media OK'); },
         function (err) { setRecStatus('Error: ' + err.message, false); }
       );
-      mediaRec.startRecord();
-      setRecStatus('🔴 Grabando (back)...', true);
-      window._cordovaMedia = mediaRec;
-      window._cordovaFilePath = filePath;
+
+      _cordovaMedia.startRecord();
+      setRecStatus('🔴 Grabando...', true);
+    }
+
+    // Cordova- detener grabacion
+
+    function stopCordova() {
+      if (!_cordovaMedia) return;
+
+      _cordovaMedia.stopRecord();
+      _cordovaMedia.release();
+      _cordovaMedia = null;
+
+      setRecStatus('⏳ Transcribiendo...', false);
+
+      // Lee el archivo y lo envía al back via HTTP POST
+      window.resolveLocalFileSystemURL(_cordovaFilePath, function (fileEntry) {
+        fileEntry.file(function (file) {
+          var reader = new FileReader();
+          reader.onloadend = function () {
+            var arrayBuffer = this.result;
+
+            fetch('http://localhost:8766/transcribir', {
+              method: 'POST',
+              headers: { 'Content-Type': 'audio/wav' },
+              body: arrayBuffer
+            })
+              .then(function (res) { return res.text(); })
+              .then(function (texto) {
+                if (texto && texto.trim()) {
+                  textoFinal = texto.trim() + ' ';
+                  var el = document.getElementById('transcripcion');
+                  el.classList.remove('vacio');
+                  el.textContent = textoFinal;
+                  el.scrollTop = el.scrollHeight;
+                  setRecStatus('✅ Transcripción lista', false);
+                  guardar_transcripcion(texto); // guarda en back automáticamente
+                }
+              })
+              .catch(function (err) {
+                setRecStatus('Error al enviar audio: ' + err.message, false);
+              });
+          };
+          reader.readAsArrayBuffer(file);
+        });
+      }, function (err) {
+        setRecStatus('Error al leer archivo: ' + err.code, false);
+      });
     }
 
     // ─── Modo Local — Web Speech API ───────────────────────
