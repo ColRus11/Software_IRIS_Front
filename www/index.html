@@ -229,7 +229,7 @@
     var WS_TIMEOUT = 4000;
 
     // ─── Estado ────────────────────────────────────────────
-    var esCordova = false;
+    var esCordova = false; //temporalmente true por test
     var modoActual = null;
     var mediaRecorder = null;
     var socket = null;
@@ -309,48 +309,116 @@
 
     detenerVisualizador(); // canvas oscuro inicial
 
+    // Visualizador Universal
+    function iniciarVisualizador(stream) {
+      // En iOS, el AudioContext debe reanudarse tras un clic
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+
+      analyser = audioCtx.createAnalyser();
+      analyser.fftSize = 256;
+
+      var source = audioCtx.createMediaStreamSource(stream);
+      source.connect(analyser);
+
+      var bufferLength = analyser.frequencyBinCount;
+      var dataArray = new Uint8Array(bufferLength);
+
+      function draw() {
+        animFrameId = requestAnimationFrame(draw);
+        analyser.getByteFrequencyData(dataArray);
+
+        var W = canvas.offsetWidth;
+        var H = canvas.offsetHeight;
+        canvas.width = W;
+        canvas.height = H;
+
+        canvasCtx.clearRect(0, 0, W, H);
+        canvasCtx.fillStyle = '#1a1a2e';
+        canvasCtx.fillRect(0, 0, W, H);
+
+        var barWidth = (W / bufferLength) * 2.5;
+        var x = 0;
+
+        for (var i = 0; i < bufferLength; i++) {
+          var barHeight = (dataArray[i] / 255) * H;
+          var hue = 200 + (dataArray[i] / 255) * 60;
+          canvasCtx.fillStyle = 'hsl(' + hue + ', 80%, 60%)';
+          canvasCtx.fillRect(x, H - barHeight, barWidth - 1, barHeight);
+          x += barWidth;
+        }
+      }
+      draw();
+    }
     // ─── Grabar ────────────────────────────────────────────
     function startRecording() {
       document.getElementById('btnGrabar').disabled = true;
       document.getElementById('btnDetener').disabled = false;
 
-      intentarWebSocket(function (conectado) {
-        if (conectado) {
-          setModo('websocket');
-          if (esCordova) startCordova(); else startWeb();
-        } else {
-          setModo('local');
-          startLocal();
-        }
-      });
+      // 1. Siempre intentar activar el visualizador primero (Web API)
+      navigator.mediaDevices.getUserMedia({ audio: true })
+        .then(function (stream) {
+          iniciarVisualizador(stream);
+          // Guardamos el stream para cerrarlo luego
+          window.currentStream = stream;
+
+          // 2. Decidir modo de grabación
+          intentarWebSocket(function (conectado) {
+            if (conectado) {
+              setModo('websocket');
+              if (esCordova) startCordova(); else startWeb();
+            } else {
+              setModo('local');
+              startLocal();
+            }
+          });
+        })
+        .catch(function (err) {
+          console.error("Error acceso mic para visualizador:", err);
+          setRecStatus('Error Mic: ' + err.message, false);
+        });
     }
 
     function stopRecording() {
-      // Para MediaRecorder
-      if (mediaRecorder && mediaRecorder.state !== 'inactive') {
-        mediaRecorder.stop();
-        mediaRecorder = null;
+      detenerVisualizador();
+      // Detener el stream de hardware
+      if (window.currentStream) {
+        window.currentStream.getTracks().forEach(track => track.stop());
+        window.currentStream = null;
       }
       SpeechLocal.stop();
-      detenerVisualizador();
-      setRecStatus('⏳ Transcribiendo...', false);
       document.getElementById('btnGrabar').disabled = false;
       document.getElementById('btnDetener').disabled = true;
       setModo(null);
 
-      // Envía señal FIN y espera respuesta antes de cerrar
-      if (socket && socket.readyState === WebSocket.OPEN) {
-        socket.onmessage = function (e) {
-          var texto = e.data;
-          if (texto && texto !== '...') {
-            agregarTextoFinal(texto);
-            setRecStatus('✅ Transcripción lista', false);
-          }
-          socket.close();
-          socket = null;
-          setWsStatus('desconectado', '⚪ WebSocket sin conectar');
-        };
-        socket.send("FIN");
+      if (esCordova) {
+        // En Cordova — Envía el archivo al backend
+        stopCordova();
+      } else {
+        // En web — detiene MediaRecorder y envía señal FIN por WebSocket
+        if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+          mediaRecorder.stop();
+          mediaRecorder = null;
+        }
+        setRecStatus('⏳ Transcribiendo...', false);
+        if (socket && socket.readyState === WebSocket.OPEN) {
+          socket.onmessage = function (e) {
+            var texto = e.data;
+            if (texto && texto !== '(fin)') {
+              agregarTextoFinal(texto);
+              setRecStatus('✅ Transcripción lista', false);
+            }
+            socket.close();
+            socket = null;
+            setWsStatus('desconectado', '⚪ WebSocket sin conectar');
+          };
+          socket.send("FIN");
+        }
       }
     }
 
@@ -469,19 +537,26 @@
     // Cordova- detener grabacion
 
     function stopCordova() {
-      if (!_cordovaMedia) return;
-
+      console.log('[stopCordova] Iniciando...');
+      if (!_cordovaMedia) {
+        console.log('[stopCordova] _cordovaMedia es null, saliendo');
+        return;
+      }
       _cordovaMedia.stopRecord();
       _cordovaMedia.release();
       _cordovaMedia = null;
 
+      console.log('[stopCordova] Archivo grabado en:', _cordovaFilePath);
       setRecStatus('⏳ Transcribiendo...', false);
 
       // Lee el archivo y lo envía al back via HTTP POST
       window.resolveLocalFileSystemURL(_cordovaFilePath, function (fileEntry) {
+        console.log('[stopCordova] Archivo encontrado, leyendo...');
         fileEntry.file(function (file) {
+          console.log('[stopCordova] Tamaño del archivo:', file.size, 'bytes');
           var reader = new FileReader();
           reader.onloadend = function () {
+            console.log('[stopCordova] Archivo leído, enviando al back...');
             var arrayBuffer = this.result;
 
             fetch('https://softwareirisback-production.up.railway.app/transcribir', {
@@ -508,6 +583,7 @@
           reader.readAsArrayBuffer(file);
         });
       }, function (err) {
+        console.log('[stopCordova] Error al resolver archivo:', err.code);
         setRecStatus('Error al leer archivo: ' + err.code, false);
       });
     }
