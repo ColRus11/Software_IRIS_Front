@@ -224,7 +224,7 @@
   <script>
 
     // ─── Configuración ─────────────────────────────────────
-    var WS_URL = 'ws://localhost:8765';
+    var WS_URL = 'wss://softwareirisback-production.up.railway.app';
     var FRAGMENT_MS = 3000;
     var WS_TIMEOUT = 4000;
 
@@ -484,7 +484,7 @@
           reader.onloadend = function () {
             var arrayBuffer = this.result;
 
-            fetch('http://localhost:8766/transcribir', {
+            fetch('https://softwareirisback-production.up.railway.app/transcribir', {
               method: 'POST',
               headers: { 'Content-Type': 'audio/wav' },
               body: arrayBuffer
@@ -498,7 +498,7 @@
                   el.textContent = textoFinal;
                   el.scrollTop = el.scrollHeight;
                   setRecStatus('✅ Transcripción lista', false);
-                  guardar_transcripcion(texto); // guarda en back automáticamente
+                  //guardar_transcripcion(texto); // guarda en back automáticamente
                 }
               })
               .catch(function (err) {
