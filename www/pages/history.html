@@ -1,0 +1,38 @@
+<!-- pages/history.html — Historial de Preguntas -->
+<div id="page-history" class="ds-page">
+  <div class="ds-content">
+    <section style="margin-bottom:1.5rem;">
+      <h2 class="ds-section-title">Historial</h2>
+      <p class="ds-section-sub">Tus preguntas anteriores.</p>
+    </section>
+
+    <div class="ds-card" style="margin-bottom:1rem;display:flex;align-items:center;gap:0.75rem;padding:0.75rem 1rem;">
+      <span class="material-symbols-outlined" style="color:var(--c-outline);">search</span>
+      <input type="text" id="history-search" style="border:none;background:transparent;font-family:var(--font-body);font-size:1rem;color:var(--c-on-surface);outline:none;width:100%;" placeholder="Buscar pregunta...">
+    </div>
+
+    <ul id="history-list" style="list-style:none;display:flex;flex-direction:column;gap:0.5rem;"></ul>
+    <div id="history-empty" style="text-align:center;padding:3rem;color:var(--c-outline);">
+      <span class="material-symbols-outlined" style="font-size:48px;opacity:.4;">inventory_2</span>
+      <p style="margin-top:0.75rem;">No hay preguntas en el historial</p>
+    </div>
+    <div id="history-loading" style="display:none;text-align:center;padding:2rem;">
+      <div style="width:32px;height:32px;border:3px solid var(--c-outline-var);border-top-color:var(--c-secondary);border-radius:50%;animation:ds-spin 0.8s linear infinite;margin:0 auto;"></div>
+    </div>
+  </div>
+
+  <nav class="ds-bottom-nav">
+    <button class="ds-nav-item" onclick="IrisApp.goHome()">
+      <span class="material-symbols-outlined">home</span>Home
+    </button>
+    <button class="ds-nav-item" onclick="IrisApp.navigateTo('questions')">
+      <span class="material-symbols-outlined">record_voice_over</span>Voz
+    </button>
+    <button class="ds-nav-item active">
+      <span class="material-symbols-outlined">history</span>Historial
+    </button>
+    <button class="ds-nav-item" onclick="IrisApp.navigateTo('settings')">
+      <span class="material-symbols-outlined">settings</span>Config
+    </button>
+  </nav>
+</div>

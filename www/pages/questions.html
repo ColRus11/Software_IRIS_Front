@@ -1,0 +1,115 @@
+<!-- pages/questions.html — Preguntar con Voz (existente, rediseñada) -->
+<div id="page-questions" class="ds-page">
+  <div class="ds-content">
+
+    <section style="margin-bottom:1.5rem;">
+      <h2 class="ds-section-title">Preguntar con Voz</h2>
+      <p class="ds-section-sub">Escribe tu pregunta y IRIS la reproducirá para el docente.</p>
+    </section>
+
+    <!-- Form card -->
+    <div class="ds-card" style="margin-bottom:1rem;">
+      <div class="ds-input-group" style="margin-bottom:1rem;">
+        <label for="session-name">Nombre de la clase (opcional)</label>
+        <input class="ds-input" id="session-name" type="text" placeholder="Ej: Cálculo I — Límites">
+      </div>
+      <div class="ds-input-group" style="margin-bottom:1rem;">
+        <label for="question-text">Tu pregunta</label>
+        <textarea id="question-text" style="min-height:120px;padding:1rem;background:var(--c-surface-high);border:none;border-bottom:2px solid transparent;border-radius:0.5rem 0.5rem 0 0;font-family:var(--font-body);font-size:1rem;color:var(--c-on-surface);outline:none;resize:vertical;transition:border-color 150ms;width:100%;" placeholder="Escribe aquí la pregunta que deseas que el profesor escuche..." rows="4"
+          onfocus="this.style.borderBottomColor='var(--c-secondary)'" onblur="this.style.borderBottomColor='transparent'"></textarea>
+      </div>
+
+      <!-- Voice selector -->
+      <div style="margin-bottom:1rem;">
+        <label style="font-size:0.75rem;font-weight:700;color:var(--c-outline);display:block;margin-bottom:6px;">Voz</label>
+        <select id="voice-selector" style="width:100%;height:48px;background:var(--c-surface-high);border:none;border-radius:0.5rem;padding:0 1rem;font-family:var(--font-body);font-size:0.9375rem;color:var(--c-on-surface);outline:none;cursor:pointer;">
+          <option value="">🔊 Voz del navegador (automática)</option>
+        </select>
+      </div>
+
+      <div style="display:flex;gap:0.75rem;">
+        <button id="btn-speak" class="ds-btn ds-btn--secondary" style="flex:1;">
+          <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">volume_up</span>
+          Reproducir
+        </button>
+        <button id="btn-save" class="ds-btn ds-btn--primary" style="flex:1;" disabled>
+          <span class="material-symbols-outlined">save</span>
+          Guardar
+        </button>
+      </div>
+
+    </div>
+
+    <!-- TTS indicator -->
+    <div id="tts-indicator" class="ds-card" style="display:none;align-items:center;gap:1rem;margin-bottom:1rem;">
+      <div class="ds-wave active" style="opacity:1;">
+        <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+      </div>
+      <span style="font-size:0.875rem;font-weight:600;color:var(--c-secondary);">Reproduciendo...</span>
+      <button id="btn-stop-tts" class="ds-btn ds-btn--outline ds-btn--sm" style="margin-left:auto;" onclick="IrisTTS.stop()">
+        <span class="material-symbols-outlined">stop</span>
+      </button>
+    </div>
+
+    <!-- Audio monitor -->
+    <div class="ds-card" style="margin-bottom:1rem;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.75rem;">
+        <div style="display:flex;align-items:center;gap:0.75rem;">
+          <span id="audio-status-dot" style="width:10px;height:10px;border-radius:50%;background:var(--c-outline-var);"></span>
+          <span id="audio-level-label" style="font-size:0.875rem;color:var(--c-outline);">Audio inactivo</span>
+        </div>
+        <button id="btn-toggle-mic" class="ds-btn ds-btn--outline ds-btn--sm">
+          <span class="material-symbols-outlined">mic</span>
+          <span id="btn-mic-text">Probar Micrófono</span>
+        </button>
+      </div>
+      <div id="audio-vu-meter" style="display:flex;align-items:flex-end;gap:3px;height:32px;">
+        <div class="iris-vu-bar" style="flex:1;background:var(--c-outline-var);border-radius:2px;height:4px;transition:height 80ms;"></div>
+        <div class="iris-vu-bar" style="flex:1;background:var(--c-outline-var);border-radius:2px;height:4px;transition:height 80ms;"></div>
+        <div class="iris-vu-bar" style="flex:1;background:var(--c-outline-var);border-radius:2px;height:4px;transition:height 80ms;"></div>
+        <div class="iris-vu-bar" style="flex:1;background:var(--c-outline-var);border-radius:2px;height:4px;transition:height 80ms;"></div>
+        <div class="iris-vu-bar" style="flex:1;background:var(--c-outline-var);border-radius:2px;height:4px;transition:height 80ms;"></div>
+        <div class="iris-vu-bar" style="flex:1;background:var(--c-outline-var);border-radius:2px;height:4px;transition:height 80ms;"></div>
+        <div class="iris-vu-bar" style="flex:1;background:var(--c-outline-var);border-radius:2px;height:4px;transition:height 80ms;"></div>
+        <div class="iris-vu-bar" style="flex:1;background:var(--c-outline-var);border-radius:2px;height:4px;transition:height 80ms;"></div>
+        <div class="iris-vu-bar" style="flex:1;background:var(--c-outline-var);border-radius:2px;height:4px;transition:height 80ms;"></div>
+        <div class="iris-vu-bar" style="flex:1;background:var(--c-outline-var);border-radius:2px;height:4px;transition:height 80ms;"></div>
+        <div class="iris-vu-bar" style="flex:1;background:var(--c-outline-var);border-radius:2px;height:4px;transition:height 80ms;"></div>
+        <div class="iris-vu-bar" style="flex:1;background:var(--c-outline-var);border-radius:2px;height:4px;transition:height 80ms;"></div>
+        <div class="iris-vu-bar" style="flex:1;background:var(--c-outline-var);border-radius:2px;height:4px;transition:height 80ms;"></div>
+        <div class="iris-vu-bar" style="flex:1;background:var(--c-outline-var);border-radius:2px;height:4px;transition:height 80ms;"></div>
+        <div class="iris-vu-bar" style="flex:1;background:var(--c-outline-var);border-radius:2px;height:4px;transition:height 80ms;"></div>
+        <div class="iris-vu-bar" style="flex:1;background:var(--c-outline-var);border-radius:2px;height:4px;transition:height 80ms;"></div>
+      </div>
+    </div>
+
+    <!-- Session questions -->
+    <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.75rem;">
+      <span class="material-symbols-outlined" style="color:var(--c-secondary);">forum</span>
+      <h3 style="font-family:var(--font-headline);font-weight:700;font-size:1rem;color:var(--c-primary);">Preguntas de esta sesión</h3>
+    </div>
+    <ul id="session-questions" style="list-style:none;display:flex;flex-direction:column;gap:0.5rem;"></ul>
+    <div id="session-empty" style="text-align:center;padding:2rem;color:var(--c-outline);">
+      <span class="material-symbols-outlined" style="font-size:40px;opacity:.4;">chat_bubble_outline</span>
+      <p style="margin-top:0.5rem;font-size:0.875rem;">Aún no has hecho preguntas en esta sesión</p>
+    </div>
+  </div>
+
+  <nav class="ds-bottom-nav">
+    <button class="ds-nav-item" onclick="IrisApp.navigateTo('student-home')">
+      <span class="material-symbols-outlined">home</span>Home
+    </button>
+    <button class="ds-nav-item" onclick="IrisApp.navigateTo('transcription')">
+      <span class="material-symbols-outlined">speech_to_text</span>Clase
+    </button>
+    <button class="ds-nav-item active" onclick="IrisApp.navigateTo('questions')">
+      <span class="material-symbols-outlined">record_voice_over</span>Voz
+    </button>
+    <button class="ds-nav-item" onclick="IrisApp.navigateTo('alerts')">
+      <span class="material-symbols-outlined">notifications</span>Alertas
+    </button>
+    <button class="ds-nav-item" onclick="IrisApp.navigateTo('settings')">
+      <span class="material-symbols-outlined">settings</span>Config
+    </button>
+  </nav>
+</div>

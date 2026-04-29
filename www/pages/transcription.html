@@ -1,0 +1,88 @@
+<!-- pages/transcription.html — Transcripción en Tiempo Real -->
+<!-- Basado en mockup: real_time_transcription/code.html — usa Web Speech API -->
+<div id="page-transcription" class="ds-page">
+  <div class="ds-content">
+
+    <!-- Status bar -->
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:0.75rem 1rem;background:var(--c-surface-white);border-radius:var(--r-lg);margin-bottom:1rem;box-shadow:var(--shadow-sm);">
+      <div style="display:flex;align-items:center;gap:0.75rem;">
+        <div id="transcript-live-dot" style="width:10px;height:10px;border-radius:50%;background:var(--c-secondary);animation:ds-pulse 1.5s infinite;"></div>
+        <div>
+          <p style="font-size:0.6875rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--c-secondary);" id="transcript-session-label">Sesión en vivo</p>
+          <p style="font-size:0.875rem;font-weight:600;color:var(--c-primary);" id="transcript-session-name">—</p>
+        </div>
+      </div>
+      <div style="display:flex;gap:0.5rem;">
+        <button onclick="IrisTranscription.recognition && document.querySelector('.ds-transcript-text').style.setProperty('font-size','1.125rem')" style="width:32px;height:32px;border-radius:0.5rem;border:none;background:var(--c-surface-high);cursor:pointer;display:flex;align-items:center;justify-content:center;">
+          <span class="material-symbols-outlined" style="font-size:18px;">text_decrease</span>
+        </button>
+        <button onclick="IrisTranscription.recognition && document.querySelector('.ds-transcript-text').style.setProperty('font-size','1.75rem')" style="width:32px;height:32px;border-radius:0.5rem;border:none;background:var(--c-surface-high);cursor:pointer;display:flex;align-items:center;justify-content:center;">
+          <span class="material-symbols-outlined" style="font-size:18px;">text_increase</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Live transcript area -->
+    <div class="ds-transcript-box" style="margin-bottom:1rem;position:relative;">
+      <div style="position:absolute;top:1rem;right:1rem;font-size:0.625rem;font-weight:700;color:var(--c-outline);text-transform:uppercase;letter-spacing:.06em;" id="transcript-time">Tiempo Real</div>
+
+      <div id="transcript-empty" style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:200px;gap:0.75rem;color:var(--c-outline);">
+        <span class="material-symbols-outlined" style="font-size:48px;opacity:.4;">mic_off</span>
+        <p style="font-size:0.875rem;">Presiona <strong>Iniciar</strong> para transcribir</p>
+      </div>
+
+      <div id="transcript-content" style="display:none;">
+        <p class="ds-transcript-text" id="transcript-text" style="font-size:1.375rem;line-height:1.7;"></p>
+        <p class="ds-transcript-text ds-transcript-interim" id="transcript-interim" style="font-size:1.375rem;line-height:1.7;opacity:.5;"></p>
+      </div>
+
+      <!-- Waveform decoration -->
+      <div class="ds-wave" id="transcript-wave" style="position:absolute;bottom:1rem;left:1rem;right:1rem;opacity:.15;">
+        <span style="height:4px;"></span><span style="height:8px;"></span><span style="height:16px;"></span>
+        <span style="height:10px;"></span><span style="height:20px;"></span><span style="height:6px;"></span>
+        <span style="height:14px;"></span><span style="height:8px;"></span>
+      </div>
+    </div>
+
+    <!-- Controls -->
+    <div style="display:flex;gap:0.75rem;margin-bottom:1rem;">
+      <button id="btn-start-transcript" class="ds-btn ds-btn--primary" style="flex:1;" onclick="IrisApp.toggleTranscription()">
+        <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">mic</span>
+        <span id="btn-transcript-text">Iniciar Transcripción</span>
+      </button>
+      <button id="btn-clear-transcript" class="ds-btn ds-btn--outline ds-btn--sm" style="height:56px;width:56px;padding:0;" onclick="IrisApp.clearTranscript()" title="Limpiar">
+        <span class="material-symbols-outlined">delete_sweep</span>
+      </button>
+    </div>
+
+    <button class="ds-btn ds-btn--secondary ds-btn--full" onclick="IrisApp.saveTranscript()">
+      <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">save</span>
+      Guardar Transcripción
+    </button>
+
+    <!-- Support banner -->
+    <div style="margin-top:1rem;padding:1rem;background:var(--c-sec-cont);border-radius:var(--r-lg);display:flex;align-items:center;gap:0.75rem;">
+      <span class="material-symbols-outlined" style="color:var(--c-secondary);font-variation-settings:'FILL' 1;">info</span>
+      <p style="font-size:0.8125rem;color:var(--c-secondary);font-weight:500;">Transcripción gratuita con Web Speech API. Necesitas conexión a internet y micrófono.</p>
+    </div>
+  </div>
+
+  <!-- Bottom Nav -->
+  <nav class="ds-bottom-nav">
+    <button class="ds-nav-item" onclick="IrisApp.navigateTo('student-home')">
+      <span class="material-symbols-outlined">home</span>Home
+    </button>
+    <button class="ds-nav-item active" onclick="IrisApp.navigateTo('transcription')">
+      <span class="material-symbols-outlined">speech_to_text</span>Clase
+    </button>
+    <button class="ds-nav-item" onclick="IrisApp.navigateTo('questions')">
+      <span class="material-symbols-outlined">record_voice_over</span>Voz
+    </button>
+    <button class="ds-nav-item" onclick="IrisApp.navigateTo('alerts')">
+      <span class="material-symbols-outlined">notifications</span>Alertas
+    </button>
+    <button class="ds-nav-item" onclick="IrisApp.navigateTo('settings')">
+      <span class="material-symbols-outlined">settings</span>Config
+    </button>
+  </nav>
+</div>

@@ -1,0 +1,76 @@
+<!-- pages/alerts.html — Alertas de Emergencia (estudiante/admin) -->
+<!-- Basado en mockup: emergency_alerts/code.html + campus_alert_control -->
+<div id="page-alerts" class="ds-page">
+  <div class="ds-content">
+
+    <section style="margin-bottom:1.5rem;display:flex;justify-content:space-between;align-items:flex-start;">
+      <div>
+        <h2 class="ds-section-title">Alertas</h2>
+        <p class="ds-section-sub">Notificaciones de emergencia del campus.</p>
+      </div>
+      <!-- Solo admin puede crear -->
+      <button id="btn-new-alert" class="ds-btn ds-btn--primary ds-btn--sm" style="display:none;" onclick="IrisApp.showNewAlertForm()">
+        <span class="material-symbols-outlined">add</span>Nueva
+      </button>
+    </section>
+
+    <!-- Formulario nueva alerta (solo admin) -->
+    <div id="new-alert-form" class="ds-card" style="display:none;margin-bottom:1rem;border-left:4px solid var(--c-error);">
+      <h3 style="font-family:var(--font-headline);font-weight:700;color:var(--c-primary);margin-bottom:1rem;">Nueva Alerta</h3>
+      <div style="display:flex;flex-direction:column;gap:0.75rem;">
+        <div class="ds-input-group">
+          <label for="alert-title">Título</label>
+          <input class="ds-input" id="alert-title" type="text" placeholder="Ej: Simulacro de evacuación">
+        </div>
+        <div class="ds-input-group">
+          <label for="alert-message">Mensaje</label>
+          <textarea id="alert-message" style="min-height:80px;padding:1rem;background:var(--c-surface-high);border:none;border-radius:0.5rem;font-family:var(--font-body);font-size:1rem;width:100%;outline:none;resize:vertical;" placeholder="Descripción de la alerta..."></textarea>
+        </div>
+        <div class="ds-input-group">
+          <label for="alert-severity">Nivel</label>
+          <select id="alert-severity" style="height:48px;background:var(--c-surface-high);border:none;border-radius:0.5rem;padding:0 1rem;font-family:var(--font-body);font-size:0.9375rem;width:100%;outline:none;">
+            <option value="info">ℹ️ Información</option>
+            <option value="warning">⚠️ Advertencia</option>
+            <option value="emergency">🚨 Emergencia</option>
+          </select>
+        </div>
+        <div style="display:flex;gap:0.75rem;">
+          <button class="ds-btn ds-btn--primary" style="flex:1;" onclick="IrisApp.submitAlert()">
+            <span class="material-symbols-outlined">send</span>Enviar Alerta
+          </button>
+          <button class="ds-btn ds-btn--outline" onclick="IrisApp.hideNewAlertForm()">Cancelar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Alert list -->
+    <div id="alerts-list">
+      <div style="text-align:center;padding:3rem;color:var(--c-outline);">
+        <span class="material-symbols-outlined" style="font-size:48px;opacity:.4;">notifications_off</span>
+        <p style="margin-top:0.75rem;font-size:0.9375rem;font-weight:500;">Sin alertas activas</p>
+        <p style="font-size:0.8125rem;margin-top:0.25rem;">El campus está en calma.</p>
+      </div>
+    </div>
+
+    <!-- Loading -->
+    <div id="alerts-loading" style="display:none;text-align:center;padding:2rem;">
+      <div style="width:32px;height:32px;border:3px solid var(--c-outline-var);border-top-color:var(--c-secondary);border-radius:50%;animation:ds-spin 0.8s linear infinite;margin:0 auto;"></div>
+    </div>
+  </div>
+
+  <nav class="ds-bottom-nav" id="alerts-nav">
+    <button class="ds-nav-item" onclick="IrisApp.goHome()">
+      <span class="material-symbols-outlined">home</span>Home
+    </button>
+    <button class="ds-nav-item active">
+      <span class="material-symbols-outlined">notifications</span>Alertas
+    </button>
+    <button class="ds-nav-item" onclick="IrisApp.navigateTo('settings')">
+      <span class="material-symbols-outlined">settings</span>Config
+    </button>
+  </nav>
+</div>
+
+<style>
+@keyframes ds-spin { to { transform: rotate(360deg); } }
+</style>

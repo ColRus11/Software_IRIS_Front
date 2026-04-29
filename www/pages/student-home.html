@@ -1,0 +1,109 @@
+<!-- pages/student-home.html — Dashboard del Estudiante -->
+<!-- Basado en mockup: student_home_dashboard/code.html -->
+<div id="page-student-home" class="ds-page active">
+  <div class="ds-content">
+
+    <!-- Welcome -->
+    <section style="margin-bottom:1.75rem;">
+      <h2 class="ds-section-title">Hola, <span id="student-greeting-name">Estudiante</span> 👋</h2>
+      <p class="ds-section-sub">Tu campus está listo para conectarse contigo hoy.</p>
+    </section>
+
+    <!-- Bento grid -->
+    <div class="ds-bento" style="row-gap:1rem;">
+
+      <!-- Transcripción en vivo — card grande -->
+      <div class="ds-card col-2" style="cursor:pointer;min-height:160px;display:flex;flex-direction:column;justify-content:space-between;" onclick="IrisApp.navigateTo('transcription')">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+          <div style="background:var(--c-sec-cont);padding:0.75rem;border-radius:1rem;">
+            <span class="material-symbols-outlined" style="color:var(--c-secondary);font-variation-settings:'FILL' 1;">speech_to_text</span>
+          </div>
+          <span class="ds-badge-live">Live Now</span>
+        </div>
+        <div>
+          <h3 style="font-family:var(--font-headline);font-weight:900;font-size:1.2rem;color:var(--c-primary);">Transcripción</h3>
+          <p style="font-size:0.8125rem;color:var(--c-on-surf-var);margin-top:2px;">Convierte el habla del docente a texto en tiempo real.</p>
+        </div>
+      </div>
+
+      <!-- Voice synthesizer -->
+      <div class="ds-card" style="cursor:pointer;min-height:140px;display:flex;flex-direction:column;justify-content:space-between;" onclick="IrisApp.navigateTo('questions')">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+          <div style="background:var(--c-surface-high);padding:0.75rem;border-radius:1rem;">
+            <span class="material-symbols-outlined" style="color:var(--c-primary);">record_voice_over</span>
+          </div>
+          <span style="background:var(--c-surface-cont);color:var(--c-on-surf-var);font-size:0.625rem;font-weight:700;padding:2px 8px;border-radius:999px;text-transform:uppercase;">Ready</span>
+        </div>
+        <div>
+          <h3 style="font-family:var(--font-headline);font-weight:700;font-size:1rem;color:var(--c-primary);">Voz</h3>
+          <p style="font-size:0.75rem;color:var(--c-on-surf-var);margin-top:2px;">Pregunta con voz sintética.</p>
+        </div>
+      </div>
+
+      <!-- Group transcription -->
+      <div class="ds-card" style="cursor:pointer;min-height:140px;display:flex;flex-direction:column;justify-content:space-between;opacity:.6;">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+          <div style="background:var(--c-surface-high);padding:0.75rem;border-radius:1rem;">
+            <span class="material-symbols-outlined" style="color:var(--c-primary);">group</span>
+          </div>
+          <span style="background:var(--c-surface-cont);color:var(--c-on-surf-var);font-size:0.625rem;font-weight:700;padding:2px 8px;border-radius:999px;text-transform:uppercase;">Pronto</span>
+        </div>
+        <div>
+          <h3 style="font-family:var(--font-headline);font-weight:700;font-size:1rem;color:var(--c-primary);">Grupo</h3>
+          <p style="font-size:0.75rem;color:var(--c-on-surf-var);margin-top:2px;">Transcripción multi-persona.</p>
+        </div>
+      </div>
+
+      <!-- Campus map -->
+      <div class="ds-card col-2" style="cursor:pointer;padding:0;overflow:hidden;" onclick="IrisApp.navigateTo('alerts')">
+        <div style="height:100px;background:linear-gradient(135deg,#e7e8e9,#d9dadb);display:flex;align-items:center;justify-content:center;position:relative;">
+          <span class="material-symbols-outlined" style="font-size:48px;color:var(--c-outline-var);opacity:.5;">map</span>
+          <div style="position:absolute;top:12px;right:12px;">
+            <span class="ds-badge-live" style="background:rgba(186,26,26,.1);color:var(--c-error);">Alerta Activa</span>
+          </div>
+        </div>
+        <div style="padding:1rem 1.5rem;display:flex;justify-content:space-between;align-items:center;">
+          <div>
+            <h3 style="font-family:var(--font-headline);font-weight:900;font-size:1.1rem;color:var(--c-primary);">Campus Map</h3>
+            <p style="font-size:0.8125rem;color:var(--c-on-surf-var);">Alertas de seguridad y navegación.</p>
+          </div>
+          <div style="background:var(--c-primary);color:white;width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;">
+            <span class="material-symbols-outlined">map</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Smart Assistant -->
+      <div class="ds-card col-2" style="cursor:pointer;display:flex;align-items:center;gap:1rem;background:var(--c-surface-cont);">
+        <div style="width:48px;height:48px;border-radius:50%;background:var(--grad-primary);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+          <span class="material-symbols-outlined" style="color:white;font-variation-settings:'FILL' 1;">support_agent</span>
+        </div>
+        <div style="flex:1;">
+          <h3 style="font-family:var(--font-headline);font-weight:700;font-size:1rem;color:var(--c-primary);">Asistente Virtual</h3>
+          <p style="font-size:0.75rem;color:var(--c-on-surf-var);">Soporte con IA para tu día a día.</p>
+        </div>
+        <span class="material-symbols-outlined" style="color:var(--c-outline);">chevron_right</span>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Bottom Nav — Estudiante -->
+  <nav class="ds-bottom-nav" id="student-nav">
+    <button class="ds-nav-item active" onclick="IrisApp.navigateTo('student-home')" data-nav="student-home">
+      <span class="material-symbols-outlined">home</span>Home
+    </button>
+    <button class="ds-nav-item" onclick="IrisApp.navigateTo('transcription')" data-nav="transcription">
+      <span class="material-symbols-outlined">speech_to_text</span>Clase
+    </button>
+    <button class="ds-nav-item" onclick="IrisApp.navigateTo('questions')" data-nav="questions">
+      <span class="material-symbols-outlined">record_voice_over</span>Voz
+    </button>
+    <button class="ds-nav-item" onclick="IrisApp.navigateTo('alerts')" data-nav="alerts">
+      <span class="material-symbols-outlined">notifications</span>Alertas
+    </button>
+    <button class="ds-nav-item" onclick="IrisApp.navigateTo('settings')" data-nav="settings">
+      <span class="material-symbols-outlined">settings</span>Config
+    </button>
+  </nav>
+</div>

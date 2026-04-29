@@ -1,0 +1,115 @@
+<!-- pages/settings.html — Configuración (todos los roles) -->
+<div id="page-settings" class="ds-page">
+  <div class="ds-content">
+    <section style="margin-bottom:1.5rem;">
+      <h2 class="ds-section-title">Configuración</h2>
+    </section>
+
+    <!-- Cuenta -->
+    <div class="ds-card" style="margin-bottom:1rem;">
+      <h3 style="font-family:var(--font-headline);font-weight:700;font-size:1rem;color:var(--c-primary);margin-bottom:1rem;display:flex;align-items:center;gap:0.5rem;">
+        <span class="material-symbols-outlined" style="color:var(--c-secondary);">person</span>Cuenta
+      </h3>
+      <p style="font-size:0.875rem;color:var(--c-on-surf-var);margin-bottom:0.25rem;" id="settings-email">usuario@ejemplo.com</p>
+      <p style="font-size:0.75rem;color:var(--c-outline);text-transform:uppercase;letter-spacing:.06em;" id="settings-role">—</p>
+      <button id="btn-logout-settings" class="ds-btn ds-btn--outline ds-btn--sm" style="margin-top:1rem;color:var(--c-error);border-color:var(--c-error);">
+        <span class="material-symbols-outlined">logout</span>Cerrar Sesión
+      </button>
+    </div>
+
+    <!-- Apariencia -->
+    <div class="ds-card" style="margin-bottom:1rem;">
+      <h3 style="font-family:var(--font-headline);font-weight:700;font-size:1rem;color:var(--c-primary);margin-bottom:1rem;display:flex;align-items:center;gap:0.5rem;">
+        <span class="material-symbols-outlined" style="color:var(--c-secondary);">palette</span>Apariencia
+      </h3>
+      <p style="font-size:0.8125rem;color:var(--c-outline);margin-bottom:0.75rem;">Tema de color</p>
+      <div id="theme-selector" style="display:flex;gap:0.5rem;">
+        <button class="iris-theme-btn active" data-theme="light" style="flex:1;padding:0.75rem;border-radius:0.75rem;border:2px solid transparent;background:var(--c-surface-high);cursor:pointer;font-size:0.875rem;font-weight:600;font-family:var(--font-body);">☀️ Claro</button>
+        <button class="iris-theme-btn" data-theme="dark" style="flex:1;padding:0.75rem;border-radius:0.75rem;border:2px solid transparent;background:var(--c-surface-high);cursor:pointer;font-size:0.875rem;font-weight:600;font-family:var(--font-body);">🌙 Oscuro</button>
+        <button class="iris-theme-btn" data-theme="high-contrast" style="flex:1;padding:0.75rem;border-radius:0.75rem;border:2px solid transparent;background:var(--c-surface-high);cursor:pointer;font-size:0.875rem;font-weight:600;font-family:var(--font-body);">◑ Contraste</button>
+      </div>
+      <p style="font-size:0.8125rem;color:var(--c-outline);margin-top:1rem;margin-bottom:0.75rem;">Tamaño de fuente</p>
+      <div style="display:flex;gap:0.5rem;">
+        <button class="iris-fontsize-btn active" data-size="normal" style="flex:1;padding:0.75rem;border-radius:0.75rem;border:2px solid transparent;background:var(--c-surface-high);cursor:pointer;font-weight:600;font-family:var(--font-body);">A</button>
+        <button class="iris-fontsize-btn" data-size="large" style="flex:1;padding:0.75rem;border-radius:0.75rem;border:2px solid transparent;background:var(--c-surface-high);cursor:pointer;font-weight:600;font-family:var(--font-body);font-size:1.1em;">A</button>
+        <button class="iris-fontsize-btn" data-size="xlarge" style="flex:1;padding:0.75rem;border-radius:0.75rem;border:2px solid transparent;background:var(--c-surface-high);cursor:pointer;font-weight:600;font-family:var(--font-body);font-size:1.3em;">A</button>
+      </div>
+    </div>
+
+    <!-- Voz -->
+    <div class="ds-card" style="margin-bottom:1rem;">
+      <h3 style="font-family:var(--font-headline);font-weight:700;font-size:1rem;color:var(--c-primary);margin-bottom:1rem;display:flex;align-items:center;gap:0.5rem;">
+        <span class="material-symbols-outlined" style="color:var(--c-secondary);">record_voice_over</span>Voz Sintética
+      </h3>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.75rem;">
+        <span style="font-size:0.875rem;color:var(--c-on-surf-var);">Velocidad</span>
+        <div style="display:flex;align-items:center;gap:0.75rem;">
+          <input type="range" id="voice-rate" min="0.5" max="2" step="0.1" value="1" style="width:100px;accent-color:var(--c-secondary);">
+          <span id="voice-rate-label" style="font-size:0.875rem;font-weight:600;color:var(--c-primary);min-width:2.5rem;">1.0x</span>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
+        <span style="font-size:0.875rem;color:var(--c-on-surf-var);">Tono</span>
+        <div style="display:flex;align-items:center;gap:0.75rem;">
+          <input type="range" id="voice-pitch" min="0.5" max="2" step="0.1" value="1" style="width:100px;accent-color:var(--c-secondary);">
+          <span id="voice-pitch-label" style="font-size:0.875rem;font-weight:600;color:var(--c-primary);min-width:2.5rem;">1.0</span>
+        </div>
+      </div>
+      <button id="btn-test-voice" class="ds-btn ds-btn--outline ds-btn--sm">
+        <span class="material-symbols-outlined">volume_up</span>Probar voz
+      </button>
+    </div>
+
+    <!-- Notificaciones -->
+    <div class="ds-card" style="margin-bottom:1rem;">
+      <h3 style="font-family:var(--font-headline);font-weight:700;font-size:1rem;color:var(--c-primary);margin-bottom:1rem;display:flex;align-items:center;gap:0.5rem;">
+        <span class="material-symbols-outlined" style="color:var(--c-secondary);">notifications_active</span>Notificaciones
+      </h3>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.75rem;">
+        <span style="font-size:0.875rem;color:var(--c-on-surf-var);">Vibración</span>
+        <label style="position:relative;display:inline-block;width:44px;height:24px;">
+          <input type="checkbox" id="toggle-vibration" checked style="opacity:0;width:0;height:0;">
+          <span style="position:absolute;inset:0;background:var(--c-outline-var);border-radius:999px;cursor:pointer;transition:.3s;" id="vib-slider"></span>
+        </label>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
+        <span style="font-size:0.875rem;color:var(--c-on-surf-var);">Destellos visuales</span>
+        <label style="position:relative;display:inline-block;width:44px;height:24px;">
+          <input type="checkbox" id="toggle-flash" checked style="opacity:0;width:0;height:0;">
+          <span style="position:absolute;inset:0;background:var(--c-outline-var);border-radius:999px;cursor:pointer;transition:.3s;" id="flash-slider"></span>
+        </label>
+      </div>
+      <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
+        <button id="btn-test-vibration" class="ds-btn ds-btn--outline ds-btn--sm">
+          <span class="material-symbols-outlined">vibration</span>Vibración
+        </button>
+        <button id="btn-test-flash-msg" class="ds-btn ds-btn--outline ds-btn--sm" style="border-color:#3b82f6;color:#3b82f6;">
+          <span class="material-symbols-outlined">flash_on</span>Mensaje
+        </button>
+        <button id="btn-test-flash-warn" class="ds-btn ds-btn--outline ds-btn--sm" style="border-color:#f59e0b;color:#f59e0b;">
+          <span class="material-symbols-outlined">flash_on</span>Alerta
+        </button>
+        <button id="btn-test-flash-emg" class="ds-btn ds-btn--outline ds-btn--sm" style="border-color:var(--c-error);color:var(--c-error);">
+          <span class="material-symbols-outlined">flash_on</span>Emergencia
+        </button>
+      </div>
+      <div style="margin-top:0.75rem;">
+        <select id="vibration-pattern" style="height:44px;background:var(--c-surface-high);border:none;border-radius:0.5rem;padding:0 1rem;font-family:var(--font-body);font-size:0.9375rem;width:100%;outline:none;">
+          <option value="short">Patrón: Corto</option>
+          <option value="medium">Patrón: Medio</option>
+          <option value="long">Patrón: Largo</option>
+          <option value="sos">Patrón: SOS</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <nav class="ds-bottom-nav">
+    <button class="ds-nav-item" onclick="IrisApp.goHome()">
+      <span class="material-symbols-outlined">home</span>Home
+    </button>
+    <button class="ds-nav-item active">
+      <span class="material-symbols-outlined">settings</span>Config
+    </button>
+  </nav>
+</div>

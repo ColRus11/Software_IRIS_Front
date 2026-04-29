@@ -47,7 +47,7 @@
     --iris-transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* === Tema Oscuro (Alto Contraste) === */
+/* === Tema Oscuro === */
 [data-theme="dark"] {
     --iris-primary: #64B5F6;
     --iris-primary-dark: #42A5F5;
@@ -66,6 +66,73 @@
     --iris-border: #424242;
     --iris-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
     --iris-shadow-lg: 0 4px 20px rgba(0, 0, 0, 0.5);
+}
+
+/* === Historia 3: Tema de Alto Contraste (WCAG AAA) === */
+[data-theme="high-contrast"] {
+    --iris-primary: #FFFF00;
+    --iris-primary-dark: #FFD600;
+    --iris-primary-light: #FFFF8D;
+    --iris-accent: #FF6D00;
+    --iris-accent-light: #FF9100;
+
+    --iris-bg: #000000;
+    --iris-bg-card: #1A1A1A;
+    --iris-bg-input: #262626;
+
+    --iris-text: #FFFFFF;
+    --iris-text-secondary: #E0E0E0;
+    --iris-text-on-primary: #000000;
+
+    --iris-success: #00E676;
+    --iris-warning: #FFEA00;
+    --iris-error: #FF1744;
+
+    --iris-border: #FFFFFF;
+    --iris-shadow: 0 0 0 2px #FFFFFF;
+    --iris-shadow-lg: 0 0 0 3px #FFFF00;
+}
+
+[data-theme="high-contrast"] .iris-navbar {
+    background: #000000;
+    border-bottom: 3px solid var(--iris-primary);
+}
+
+[data-theme="high-contrast"] .iris-navbar__title {
+    color: var(--iris-primary);
+}
+
+[data-theme="high-contrast"] .iris-bottom-nav {
+    border-top: 3px solid var(--iris-primary);
+}
+
+[data-theme="high-contrast"] .iris-dashboard__card {
+    border: 3px solid var(--iris-border);
+}
+
+[data-theme="high-contrast"] .iris-dashboard__card:hover,
+[data-theme="high-contrast"] .iris-dashboard__card:focus {
+    border-color: var(--iris-primary);
+    box-shadow: var(--iris-shadow-lg);
+}
+
+[data-theme="high-contrast"] .iris-btn {
+    border: 2px solid currentColor;
+    font-weight: 700;
+}
+
+[data-theme="high-contrast"] .iris-settings__group {
+    border: 2px solid var(--iris-border);
+}
+
+[data-theme="high-contrast"] .iris-login__card {
+    border: 3px solid var(--iris-primary);
+}
+
+[data-theme="high-contrast"] input,
+[data-theme="high-contrast"] textarea,
+[data-theme="high-contrast"] select {
+    border-width: 3px;
 }
 
 /* === Tamaños de fuente configurables === */
@@ -118,6 +185,7 @@ body {
     z-index: 1000;
     box-shadow: var(--iris-shadow);
     min-height: 56px;
+    transition: transform 0.4s ease, opacity 0.4s ease;
 }
 
 .iris-navbar__title {
@@ -172,7 +240,49 @@ body {
     margin: 0 auto;
 }
 
-/* === Dashboard (Pantalla Principal) === */
+/* ============================================
+   Historia 2: Dashboard de Acceso Rápido
+   ============================================ */
+
+/* Saludo personalizado */
+.iris-greeting {
+    padding: 20px 0 8px;
+    text-align: center;
+}
+
+.iris-greeting__text {
+    font-size: var(--iris-font-size-xl);
+    font-weight: 700;
+    color: var(--iris-text);
+    margin: 0 0 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.iris-greeting__wave {
+    display: inline-block;
+    animation: wave 1.8s ease-in-out infinite;
+    transform-origin: 70% 70%;
+    font-size: 1.3em;
+}
+
+@keyframes wave {
+    0%, 60%, 100% { transform: rotate(0deg); }
+    10%, 30% { transform: rotate(14deg); }
+    20% { transform: rotate(-8deg); }
+    40% { transform: rotate(-4deg); }
+    50% { transform: rotate(10deg); }
+}
+
+.iris-greeting__subtitle {
+    color: var(--iris-text-secondary);
+    font-size: 1rem;
+    margin: 0;
+}
+
+/* Dashboard grid */
 .iris-dashboard {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
@@ -183,20 +293,48 @@ body {
 .iris-dashboard__card {
     background: var(--iris-bg-card);
     border-radius: var(--iris-radius-lg);
-    padding: 24px 16px;
+    padding: 24px 16px 20px;
     text-align: center;
     box-shadow: var(--iris-shadow);
     cursor: pointer;
-    transition: transform var(--iris-transition), box-shadow var(--iris-transition);
+    transition: transform var(--iris-transition), box-shadow var(--iris-transition), border-color var(--iris-transition);
     border: 2px solid transparent;
     text-decoration: none;
     color: var(--iris-text);
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 12px;
-    min-height: 140px;
+    gap: 10px;
+    min-height: 160px;
     justify-content: center;
+    position: relative;
+}
+
+.iris-dashboard__card--featured {
+    grid-column: span 2;
+    flex-direction: row;
+    min-height: 100px;
+    padding: 20px 24px;
+    gap: 16px;
+    text-align: left;
+    justify-content: flex-start;
+    background: linear-gradient(135deg, var(--iris-accent), #E65100);
+    color: white;
+}
+
+.iris-dashboard__card--featured .iris-dashboard__icon {
+    background: rgba(255,255,255,0.25);
+    width: 72px;
+    height: 72px;
+    flex-shrink: 0;
+}
+
+.iris-dashboard__card--featured .iris-dashboard__label {
+    font-size: var(--iris-font-size-xl);
+}
+
+.iris-dashboard__card--featured .iris-dashboard__desc {
+    color: rgba(255,255,255,0.85);
 }
 
 .iris-dashboard__card:hover,
@@ -212,15 +350,24 @@ body {
 }
 
 .iris-dashboard__icon {
-    width: 64px;
-    height: 64px;
+    width: 72px;
+    height: 72px;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 2rem;
+    font-size: 2.2rem;
     color: white;
     background: linear-gradient(135deg, var(--iris-primary), var(--iris-primary-light));
+    transition: transform 0.4s ease;
+}
+
+.iris-dashboard__card:hover .iris-dashboard__icon {
+    transform: scale(1.08);
+}
+
+.iris-dashboard__icon i {
+    font-size: inherit;
 }
 
 .iris-dashboard__icon--accent {
@@ -235,10 +382,35 @@ body {
     background: linear-gradient(135deg, var(--iris-warning), #FF8F00);
 }
 
+.iris-dashboard__icon--tramites {
+    background: linear-gradient(135deg, #7B1FA2, #AB47BC);
+}
+
 .iris-dashboard__label {
     font-size: var(--iris-font-size-lg);
-    font-weight: 600;
+    font-weight: 700;
     line-height: 1.3;
+}
+
+.iris-dashboard__desc {
+    font-size: 0.8rem;
+    color: var(--iris-text-secondary);
+    line-height: 1.3;
+    margin-top: -4px;
+}
+
+.iris-dashboard__badge-soon {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: var(--iris-text-secondary);
+    color: white;
+    font-size: 0.6rem;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 /* === Página de Preguntas (Épica #2) === */
@@ -395,7 +567,7 @@ body {
     transform: none !important;
 }
 
-/* === Indicador Visual de TTS (Vúmetro) === */
+/* === Indicador Visual de TTS (Vúmetro de salida) === */
 .iris-tts-indicator {
     display: none;
     align-items: center;
@@ -446,6 +618,90 @@ body {
     font-weight: 600;
     color: var(--iris-primary);
     font-size: var(--iris-font-size-lg);
+}
+
+/* ============================================
+   Historia 5: Vúmetro de Micrófono (Audio Monitor)
+   ============================================ */
+.iris-audio-monitor {
+    background: var(--iris-bg-card);
+    border-radius: var(--iris-radius);
+    padding: 16px;
+    margin-top: 16px;
+    box-shadow: var(--iris-shadow);
+    border: 2px solid var(--iris-border);
+    transition: border-color var(--iris-transition);
+}
+
+.iris-audio-monitor__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.iris-audio-monitor__status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* VU Dot indicator */
+.iris-vu-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    transition: background-color var(--iris-transition);
+}
+
+.iris-vu-dot--active {
+    background: var(--iris-success);
+    animation: dot-pulse 1.5s ease-in-out infinite;
+}
+
+.iris-vu-dot--inactive {
+    background: var(--iris-border);
+}
+
+@keyframes dot-pulse {
+    0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(46, 125, 50, 0.4); }
+    50% { opacity: 0.8; box-shadow: 0 0 0 6px rgba(46, 125, 50, 0); }
+}
+
+/* VU Status label */
+.iris-vu-status {
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.iris-vu-status--active { color: var(--iris-success); }
+.iris-vu-status--waiting { color: var(--iris-warning); }
+.iris-vu-status--inactive { color: var(--iris-text-secondary); }
+.iris-vu-status--error { color: var(--iris-error); }
+
+/* VU Meter bars */
+.iris-vu-meter {
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    gap: 3px;
+    height: 60px;
+    padding: 8px 0;
+    background: var(--iris-bg-input);
+    border-radius: 8px;
+}
+
+.iris-vu-bar {
+    width: 100%;
+    max-width: 12px;
+    height: 4%;
+    min-height: 3px;
+    background: var(--iris-border);
+    border-radius: 2px;
+    transition: height 0.08s ease-out, background-color 0.15s ease;
 }
 
 /* === Historial de Preguntas === */
@@ -566,7 +822,9 @@ body {
     flex-shrink: 0;
 }
 
-/* === Login === */
+/* ============================================
+   Historia 1: Login + Lengua de Señas
+   ============================================ */
 .iris-login {
     display: flex;
     flex-direction: column;
@@ -603,7 +861,42 @@ body {
 .iris-login__subtitle {
     font-size: 0.95rem;
     color: var(--iris-text-secondary);
-    margin-bottom: 32px;
+    margin-bottom: 20px;
+}
+
+/* Botón Lengua de Señas */
+.iris-sign-language-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    padding: 12px 16px;
+    background: linear-gradient(135deg, #7B1FA2, #AB47BC);
+    color: white;
+    border: none;
+    border-radius: var(--iris-radius);
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--iris-transition);
+    font-family: inherit;
+    margin-bottom: 20px;
+}
+
+.iris-sign-language-btn:hover,
+.iris-sign-language-btn:focus {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(123, 31, 162, 0.4);
+    outline: 2px solid #CE93D8;
+}
+
+.iris-sign-language-btn:active {
+    transform: translateY(0);
+}
+
+.iris-sign-language-btn i {
+    font-size: 1.4em;
 }
 
 .iris-login__form {
@@ -668,7 +961,167 @@ body {
     font-family: inherit;
 }
 
-/* === Configuración (Settings) === */
+/* === Modal de Lengua de Señas === */
+.iris-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 3000;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+}
+
+.iris-modal.active {
+    display: flex;
+}
+
+.iris-modal__backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    animation: modalFadeIn 0.3s ease;
+}
+
+@keyframes modalFadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.iris-modal__content {
+    position: relative;
+    background: var(--iris-bg-card);
+    border-radius: var(--iris-radius-lg);
+    max-width: 500px;
+    width: 100%;
+    max-height: 85vh;
+    overflow-y: auto;
+    box-shadow: var(--iris-shadow-lg);
+    animation: modalSlideIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    z-index: 1;
+}
+
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(30px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.iris-modal__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 24px 16px;
+    border-bottom: 1px solid var(--iris-border);
+}
+
+.iris-modal__title {
+    font-size: var(--iris-font-size-lg);
+    font-weight: 700;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--iris-text);
+}
+
+.iris-modal__title i {
+    color: #AB47BC;
+}
+
+.iris-modal__close {
+    background: none;
+    border: none;
+    color: var(--iris-text-secondary);
+    cursor: pointer;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--iris-transition);
+}
+
+.iris-modal__close:hover {
+    background: var(--iris-bg-input);
+    color: var(--iris-text);
+}
+
+.iris-modal__body {
+    padding: 24px;
+}
+
+.iris-modal__footer {
+    padding: 16px 24px 24px;
+    display: flex;
+    justify-content: flex-end;
+}
+
+/* Video placeholder */
+.iris-sl-video-container {
+    margin-bottom: 20px;
+}
+
+.iris-sl-video-placeholder {
+    background: linear-gradient(135deg, #E1BEE7, #CE93D8);
+    border-radius: var(--iris-radius);
+    padding: 40px 20px;
+    text-align: center;
+    color: #4A148C;
+}
+
+.iris-sl-video-placeholder i {
+    font-size: 3rem;
+    margin-bottom: 8px;
+    display: block;
+    opacity: 0.7;
+}
+
+.iris-sl-video-placeholder p {
+    font-weight: 600;
+    margin: 0 0 4px;
+    font-size: 1rem;
+}
+
+.iris-sl-video-note {
+    font-size: 0.8rem;
+    opacity: 0.7;
+}
+
+/* Sign language text content */
+.iris-sl-text-content {
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: var(--iris-text);
+}
+
+.iris-sl-text-content h3 {
+    font-size: var(--iris-font-size-lg);
+    font-weight: 700;
+    margin: 0 0 12px;
+    color: var(--iris-primary);
+}
+
+.iris-sl-text-content p {
+    margin: 0 0 12px;
+}
+
+/* ============================================
+   Historia 3: Configuración (Settings)
+   ============================================ */
 .iris-settings {
     padding-top: var(--iris-spacing);
 }
@@ -697,14 +1150,72 @@ body {
     justify-content: space-between;
     padding: 12px 0;
     border-bottom: 1px solid var(--iris-border);
+    gap: 12px;
 }
 
 .iris-settings__option:last-child {
     border-bottom: none;
 }
 
+.iris-settings__option--actions {
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    gap: 8px;
+}
+
 .iris-settings__option-label {
     font-weight: 500;
+}
+
+/* Theme selector (3 modes) */
+.iris-theme-selector {
+    display: flex;
+    gap: 6px;
+}
+
+.iris-theme-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    padding: 8px 12px;
+    border: 2px solid var(--iris-border);
+    border-radius: 10px;
+    background: var(--iris-bg-input);
+    color: var(--iris-text);
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 0.7rem;
+    font-weight: 600;
+    transition: all var(--iris-transition);
+    min-width: 60px;
+}
+
+.iris-theme-btn i {
+    font-size: 1.3rem;
+}
+
+.iris-theme-btn.active {
+    border-color: var(--iris-primary);
+    background: var(--iris-primary);
+    color: var(--iris-text-on-primary);
+}
+
+.iris-theme-btn:hover:not(.active) {
+    border-color: var(--iris-primary);
+}
+
+/* Small select for notifications */
+.iris-select-small {
+    padding: 6px 12px;
+    border: 2px solid var(--iris-border);
+    border-radius: 8px;
+    background: var(--iris-bg-input);
+    color: var(--iris-text);
+    font-size: 0.9rem;
+    font-family: inherit;
+    cursor: pointer;
+    min-width: 100px;
 }
 
 /* Toggle switch */
@@ -835,6 +1346,7 @@ body {
     align-items: center;
     height: 64px;
     z-index: 1000;
+    transition: transform 0.4s ease, opacity 0.4s ease;
 }
 
 .iris-bottom-nav__item {
@@ -900,6 +1412,10 @@ body {
         grid-template-columns: 1fr;
     }
 
+    .iris-dashboard__card--featured {
+        grid-column: span 1;
+    }
+
     .iris-question-form__actions {
         flex-direction: column;
     }
@@ -956,4 +1472,109 @@ body {
     background: var(--iris-bg-input);
     color: var(--iris-text);
     font-family: inherit;
+}
+
+/* ============================================
+   Historia 4: Flash Overlay (Notificaciones Visuales)
+   ============================================ */
+.iris-flash-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 5000;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.1s ease;
+}
+
+.iris-flash-overlay.active {
+    animation: flash-pulse var(--flash-duration, 600ms) ease-out forwards;
+}
+
+@keyframes flash-pulse {
+    0% { opacity: 0; }
+    15% { opacity: 1; }
+    30% { opacity: 0.3; }
+    50% { opacity: 0.9; }
+    70% { opacity: 0.2; }
+    85% { opacity: 0.6; }
+    100% { opacity: 0; }
+}
+
+/* ============================================
+   Historia 6: Modo Enfoque (Focus Mode)
+   ============================================ */
+
+/* Botón flotante de salir de Modo Enfoque */
+.iris-focus-exit-btn {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 20px;
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    backdrop-filter: blur(8px);
+    transition: all var(--iris-transition);
+    animation: focusExitPulse 3s ease-in-out infinite;
+}
+
+.iris-focus-exit-btn:hover {
+    background: rgba(0, 0, 0, 0.9);
+    border-color: white;
+    transform: scale(1.05);
+}
+
+@keyframes focusExitPulse {
+    0%, 100% { opacity: 0.7; }
+    50% { opacity: 1; }
+}
+
+/* Focus Mode Active State */
+body.iris-focus-active .iris-navbar {
+    transform: translateY(-100%);
+    opacity: 0;
+    pointer-events: none;
+}
+
+body.iris-focus-active .iris-bottom-nav {
+    transform: translateY(100%);
+    opacity: 0;
+    pointer-events: none;
+}
+
+body.iris-focus-active .iris-content {
+    padding-top: 16px;
+    padding-bottom: 16px;
+    max-width: 100%;
+}
+
+body.iris-focus-active .iris-question-form {
+    font-size: 1.1em;
+}
+
+body.iris-focus-active .iris-question-form__textarea {
+    min-height: 200px;
+    font-size: 1.2em;
+}
+
+body.iris-focus-active .iris-focus-exit-btn {
+    display: flex !important;
+}
+
+/* Hide non-essential elements in focus mode */
+body.iris-focus-active .iris-greeting,
+body.iris-focus-active .iris-dashboard__badge-soon {
+    display: none;
 }

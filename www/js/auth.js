@@ -1,144 +1,156 @@
 /**
- * IRIS - Módulo de Autenticación
- * Firebase Authentication (email + password)
+ * IRIS / Un Mundo en Silencio — Auth Module
+ * Firebase Authentication + Firestore role verification
+ * Basado en FirebaseAuthProvider.cs del repo del compañero (UnPaused MAUI)
  */
 const IrisAuth = {
     currentUser: null,
+    currentRole: null,
+    currentProfile: null,
     _initialized: false,
 
-    /**
-     * Inicializar Firebase Auth
-     */
+    _isFirebaseReady() {
+        const fb = IRIS_CONFIG.FIREBASE;
+        return fb.apiKey && fb.apiKey !== 'YOUR_API_KEY'
+            && fb.messagingSenderId && fb.messagingSenderId !== ''
+            && fb.appId && fb.appId !== '';
+    },
+
     init() {
         if (this._initialized) return;
 
-        // Inicializar Firebase solo si la config es válida
-        if (IRIS_CONFIG.FIREBASE.apiKey !== 'YOUR_API_KEY') {
+        if (this._isFirebaseReady()) {
             try {
                 if (!firebase.apps.length) {
                     firebase.initializeApp(IRIS_CONFIG.FIREBASE);
                 }
-                // Escuchar cambios de autenticación
-                firebase.auth().onAuthStateChanged((user) => {
-                    this.currentUser = user;
+                firebase.auth().onAuthStateChanged(async (user) => {
                     if (user) {
+                        const savedRole = localStorage.getItem('iris_role');
+                        this.currentUser = user;
+                        this.currentRole = savedRole || IRIS_CONFIG.ROLES.STUDENT;
+                        await this._loadProfile(user);
                         this._onLogin(user);
                     } else {
                         this._onLogout();
                     }
                 });
             } catch (error) {
-                console.warn('Firebase init error (modo demo activo):', error.message);
+                console.warn('Firebase init error — modo demo:', error.message);
                 this._enableDemoMode();
             }
         } else {
-            console.info('🔑 Firebase no configurado. Usando modo demo.');
+            console.info('🔑 Firebase incompleto — modo demo activo.');
             this._enableDemoMode();
         }
-
         this._initialized = true;
     },
 
-    /**
-     * Modo demo cuando Firebase no está configurado
-     */
     _enableDemoMode() {
-        this.currentUser = {
-            uid: 'demo-user-' + Date.now(),
-            email: 'demo@iris.app',
+        // NO auto-login — espera a que el usuario llene el formulario
+        console.info('🎭 Modo demo activo — cualquier correo/contraseña funciona.');
+    },
+
+
+    async _loadProfile(user) {
+        try {
+            const idToken = await user.getIdToken();
+            const profile = await IrisFirestore.getUserProfile(user.uid, idToken);
+            if (profile) {
+                this.currentProfile = profile;
+                if (profile.role) {
+                    this.currentRole = profile.role;
+                    localStorage.setItem('iris_role', profile.role);
+                }
+            }
+        } catch (e) {
+            console.warn('loadProfile error:', e);
+        }
+    },
+
+    /**
+     * Login con rol — valida contra Firestore (como FirebaseAuthProvider.cs)
+     */
+    async login(email, password, selectedRole) {
+        if (!this._isFirebaseReady()) {
+            // MODO DEMO — cualquier correo/contraseña funciona
+            this.currentUser = { uid: 'demo-' + Date.now(), email };
+            this.currentRole = selectedRole || IRIS_CONFIG.ROLES.STUDENT;
+            this.currentProfile = { displayName: email.split('@')[0], role: this.currentRole };
+            localStorage.setItem('iris_role', this.currentRole);
+            this._onLogin(this.currentUser);
+            return this.currentUser;
+        }
+
+        const result = await firebase.auth().signInWithEmailAndPassword(email, password).catch(e => { throw this._parseError(e); });
+        const user = result.user;
+        const idToken = await user.getIdToken();
+
+        // Verificar rol en Firestore (lógica del compañero)
+        const confirmedRole = await IrisFirestore.verifyRole(user.uid, selectedRole, idToken).catch(e => { throw e; });
+
+        this.currentUser = user;
+        this.currentRole = confirmedRole;
+        this.currentProfile = await IrisFirestore.getUserProfile(user.uid, idToken);
+        localStorage.setItem('iris_role', confirmedRole);
+        return user;
+    },
+
+    async register(email, password, selectedRole, displayName) {
+        if (IRIS_CONFIG.FIREBASE.apiKey === 'YOUR_API_KEY') {
+            this.currentUser = { uid: 'demo-' + Date.now(), email };
+            this.currentRole = selectedRole;
+            this.currentProfile = { displayName: displayName || email.split('@')[0], role: selectedRole };
+            localStorage.setItem('iris_role', selectedRole);
+            this._onLogin(this.currentUser);
+            return this.currentUser;
+        }
+
+        const result = await firebase.auth().createUserWithEmailAndPassword(email, password).catch(e => { throw this._parseError(e); });
+        const user = result.user;
+        const idToken = await user.getIdToken();
+
+        // Guardar perfil en Firestore con rol (como FirestoreUserRepository.SaveAsync)
+        const profile = {
+            uid: user.uid,
+            displayName: displayName || email.split('@')[0],
+            email: user.email,
+            role: selectedRole,
+            university: '',
         };
-        // Mostrar app directamente en modo demo
-        setTimeout(() => this._onLogin(this.currentUser), 100);
+        await IrisFirestore.saveUserProfile(profile, idToken);
+
+        this.currentUser = user;
+        this.currentRole = selectedRole;
+        this.currentProfile = profile;
+        localStorage.setItem('iris_role', selectedRole);
+        return user;
     },
 
-    /**
-     * Registrar nuevo usuario
-     * @param {string} email
-     * @param {string} password
-     */
-    async register(email, password) {
-        if (IRIS_CONFIG.FIREBASE.apiKey === 'YOUR_API_KEY') {
-            // Modo demo
-            this.currentUser = { uid: 'demo-' + Date.now(), email };
-            this._onLogin(this.currentUser);
-            return this.currentUser;
-        }
-
-        try {
-            const result = await firebase.auth().createUserWithEmailAndPassword(email, password);
-            return result.user;
-        } catch (error) {
-            throw this._parseError(error);
-        }
-    },
-
-    /**
-     * Iniciar sesión
-     * @param {string} email
-     * @param {string} password
-     */
-    async login(email, password) {
-        if (IRIS_CONFIG.FIREBASE.apiKey === 'YOUR_API_KEY') {
-            // Modo demo
-            this.currentUser = { uid: 'demo-' + Date.now(), email };
-            this._onLogin(this.currentUser);
-            return this.currentUser;
-        }
-
-        try {
-            const result = await firebase.auth().signInWithEmailAndPassword(email, password);
-            return result.user;
-        } catch (error) {
-            throw this._parseError(error);
-        }
-    },
-
-    /**
-     * Cerrar sesión
-     */
     async logout() {
-        if (IRIS_CONFIG.FIREBASE.apiKey !== 'YOUR_API_KEY') {
-            await firebase.auth().signOut();
+        if (this._isFirebaseReady()) {
+            try { await firebase.auth().signOut(); } catch(e) { /* ignore */ }
         }
         this.currentUser = null;
+        this.currentRole = null;
+        this.currentProfile = null;
+        localStorage.removeItem('iris_role');
         this._onLogout();
     },
 
-    /**
-     * Callback cuando el usuario inicia sesión
-     */
+
     _onLogin(user) {
-        // Ocultar login, mostrar app
-        document.getElementById('page-login').classList.remove('active');
-        document.getElementById('page-login').classList.add('iris-hidden');
-        document.getElementById('app-shell').classList.remove('iris-hidden');
-
-        // Actualizar email en settings
-        const emailEl = document.getElementById('settings-email');
-        if (emailEl) emailEl.textContent = user.email || 'Usuario';
-
-        // Notificar a la app
         if (typeof IrisApp !== 'undefined' && IrisApp.onUserReady) {
             IrisApp.onUserReady(user);
         }
     },
 
-    /**
-     * Callback cuando el usuario cierra sesión
-     */
     _onLogout() {
-        document.getElementById('page-login').classList.add('active');
-        document.getElementById('page-login').classList.remove('iris-hidden');
-        document.getElementById('app-shell').classList.add('iris-hidden');
-
-        // Limpiar formulario
-        const form = document.getElementById('login-form');
-        if (form) form.reset();
+        if (typeof IrisApp !== 'undefined' && IrisApp.onUserLogout) {
+            IrisApp.onUserLogout();
+        }
     },
 
-    /**
-     * Parsear errores de Firebase a mensajes en español
-     */
     _parseError(error) {
         const messages = {
             'auth/email-already-in-use': 'Este correo ya está registrado.',
@@ -147,7 +159,7 @@ const IrisAuth = {
             'auth/user-not-found': 'No existe una cuenta con este correo.',
             'auth/wrong-password': 'La contraseña es incorrecta.',
             'auth/too-many-requests': 'Demasiados intentos. Intenta más tarde.',
-            'auth/invalid-credential': 'Credenciales inválidas. Verifica tu correo y contraseña.',
+            'auth/invalid-credential': 'Credenciales inválidas.',
         };
         return new Error(messages[error.code] || error.message);
     },

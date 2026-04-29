@@ -1,0 +1,155 @@
+<!-- pages/video-subtitles.html — Subir Video y Generar Subtítulos Automáticos -->
+<div id="page-video-subtitles" class="ds-page">
+  <div class="ds-content">
+
+    <!-- Header -->
+    <section style="margin-bottom:1.5rem;">
+      <button onclick="IrisApp.navigateTo('teacher-home')"
+        style="background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:0.5rem;color:var(--c-on-surf-var);font-size:0.875rem;font-weight:600;margin-bottom:1rem;padding:0;font-family:var(--font-body);">
+        <span class="material-symbols-outlined" style="font-size:18px;">arrow_back</span>
+        Volver
+      </button>
+      <h2 class="ds-section-title">Generar Subtítulos</h2>
+      <p class="ds-section-sub">Sube un video de clase y genera subtítulos automáticamente.</p>
+    </section>
+
+    <!-- PASO 1: Upload -->
+    <div id="vs-step-upload" class="ds-card" style="margin-bottom:1rem;">
+      <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:1rem;">
+        <div style="width:32px;height:32px;border-radius:50%;background:var(--c-primary);color:white;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:0.875rem;flex-shrink:0;">1</div>
+        <h3 style="font-family:var(--font-headline);font-weight:700;font-size:1rem;color:var(--c-primary);">Cargar Video</h3>
+      </div>
+
+      <!-- Drop zone -->
+      <label id="vs-dropzone" for="vs-file-input"
+        style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1rem;padding:2.5rem 1rem;border:2px dashed var(--c-outline-var);border-radius:var(--r-xl);cursor:pointer;transition:all var(--t-std);background:var(--c-surface-low);"
+        ondragover="event.preventDefault();this.style.borderColor='var(--c-secondary)'"
+        ondragleave="this.style.borderColor='var(--c-outline-var)'"
+        ondrop="IrisVideoSubs.handleDrop(event)">
+        <div style="width:64px;height:64px;border-radius:var(--r-xl);background:var(--c-surface-cont);display:flex;align-items:center;justify-content:center;">
+          <span class="material-symbols-outlined" style="font-size:32px;color:var(--c-secondary);">upload_file</span>
+        </div>
+        <div style="text-align:center;">
+          <p style="font-weight:700;color:var(--c-primary);margin-bottom:0.25rem;">Arrastra tu video aquí</p>
+          <p style="font-size:0.8125rem;color:var(--c-outline);">o haz click para seleccionarlo</p>
+          <p style="font-size:0.75rem;color:var(--c-outline-var);margin-top:0.5rem;">MP4, WebM, MOV • máx. 2GB</p>
+        </div>
+        <input id="vs-file-input" type="file" accept="video/*" style="display:none;" onchange="IrisVideoSubs.loadVideo(this.files[0])">
+      </label>
+
+      <!-- File info (hidden until file selected) -->
+      <div id="vs-file-info" style="display:none;margin-top:1rem;padding:0.75rem 1rem;background:var(--c-sec-cont);border-radius:var(--r-md);display:flex;align-items:center;gap:0.75rem;">
+        <span class="material-symbols-outlined" style="color:var(--c-secondary);">movie</span>
+        <div style="flex:1;min-width:0;">
+          <p style="font-weight:700;font-size:0.9375rem;color:var(--c-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" id="vs-filename">video.mp4</p>
+          <p style="font-size:0.75rem;color:var(--c-secondary);" id="vs-filesize">—</p>
+        </div>
+        <button onclick="IrisVideoSubs.reset()" style="background:none;border:none;cursor:pointer;color:var(--c-on-surf-var);">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- PASO 2: Reproductor + Transcripción -->
+    <div id="vs-step-transcribe" class="ds-card" style="margin-bottom:1rem;display:none;">
+      <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:1rem;">
+        <div style="width:32px;height:32px;border-radius:50%;background:var(--c-primary);color:white;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:0.875rem;flex-shrink:0;">2</div>
+        <h3 style="font-family:var(--font-headline);font-weight:700;font-size:1rem;color:var(--c-primary);">Reproducir y Transcribir</h3>
+      </div>
+
+      <!-- Video player -->
+      <div style="background:#000;border-radius:var(--r-lg);overflow:hidden;margin-bottom:1rem;position:relative;">
+        <video id="vs-player" controls style="width:100%;max-height:320px;display:block;"
+          ontimeupdate="IrisVideoSubs.onTimeUpdate()"
+          onplay="IrisVideoSubs.onPlay()"
+          onpause="IrisVideoSubs.onPause()"
+          onended="IrisVideoSubs.onEnded()">
+        </video>
+        <!-- Subtitle overlay -->
+        <div id="vs-subtitle-overlay"
+          style="display:none;position:absolute;bottom:48px;left:0;right:0;text-align:center;padding:0.5rem 1rem;pointer-events:none;">
+          <span id="vs-current-subtitle"
+            style="background:rgba(0,0,0,.75);color:white;font-size:1.125rem;font-weight:700;padding:0.25rem 0.75rem;border-radius:0.5rem;display:inline-block;line-height:1.5;"></span>
+        </div>
+      </div>
+
+      <!-- Instructions -->
+      <div style="padding:0.75rem 1rem;background:rgba(0,106,106,.08);border-radius:var(--r-md);margin-bottom:1rem;display:flex;gap:0.75rem;align-items:flex-start;">
+        <span class="material-symbols-outlined" style="color:var(--c-secondary);flex-shrink:0;">info</span>
+        <div>
+          <p style="font-size:0.8125rem;font-weight:700;color:var(--c-secondary);margin-bottom:0.25rem;">Cómo funciona</p>
+          <p style="font-size:0.75rem;color:var(--c-secondary);opacity:.85;line-height:1.5;">
+            Haz click en <strong>Iniciar Transcripción</strong> y luego reproduce el video. El micrófono captura el audio del video. Asegúrate de que el volumen esté alto.
+          </p>
+        </div>
+      </div>
+
+      <!-- Controls -->
+      <div style="display:flex;gap:0.75rem;">
+        <button id="vs-btn-transcribe" class="ds-btn ds-btn--primary" style="flex:1;" onclick="IrisVideoSubs.toggleTranscription()">
+          <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">mic</span>
+          <span id="vs-btn-text">Iniciar Transcripción</span>
+        </button>
+        <button class="ds-btn ds-btn--outline" style="height:56px;padding:0 1rem;" onclick="IrisVideoSubs.clearSegments()" title="Limpiar segmentos">
+          <span class="material-symbols-outlined">delete_sweep</span>
+        </button>
+      </div>
+
+      <!-- Live status -->
+      <div id="vs-live-status" style="display:none;margin-top:0.75rem;display:flex;align-items:center;gap:0.5rem;padding:0.5rem 0.75rem;background:rgba(186,26,26,.06);border-radius:0.75rem;">
+        <span style="width:8px;height:8px;border-radius:50%;background:var(--c-error);animation:ds-pulse 1s infinite;flex-shrink:0;"></span>
+        <span style="font-size:0.8125rem;font-weight:600;color:var(--c-error);">Transcribiendo...</span>
+        <span id="vs-live-text" style="font-size:0.8125rem;color:var(--c-on-surf-var);margin-left:0.5rem;font-style:italic;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;"></span>
+      </div>
+    </div>
+
+    <!-- PASO 3: Segmentos generados -->
+    <div id="vs-step-results" class="ds-card" style="margin-bottom:1rem;display:none;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
+        <div style="display:flex;align-items:center;gap:0.75rem;">
+          <div style="width:32px;height:32px;border-radius:50%;background:var(--c-secondary);color:white;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:0.875rem;flex-shrink:0;">3</div>
+          <h3 style="font-family:var(--font-headline);font-weight:700;font-size:1rem;color:var(--c-primary);">Subtítulos Generados</h3>
+        </div>
+        <span id="vs-seg-count" style="background:var(--c-sec-cont);color:var(--c-secondary);font-size:0.75rem;font-weight:700;padding:2px 10px;border-radius:999px;">0 segmentos</span>
+      </div>
+
+      <!-- Segments list (editable) -->
+      <div id="vs-segments-list" style="display:flex;flex-direction:column;gap:0.5rem;max-height:320px;overflow-y:auto;margin-bottom:1rem;"></div>
+
+      <!-- Empty state -->
+      <div id="vs-segments-empty" style="text-align:center;padding:2rem;color:var(--c-outline);">
+        <span class="material-symbols-outlined" style="font-size:40px;opacity:.4;">subtitles_off</span>
+        <p style="margin-top:0.5rem;font-size:0.875rem;">Transcribe el video para ver los segmentos aquí</p>
+      </div>
+
+      <!-- Download buttons -->
+      <div style="display:flex;gap:0.75rem;flex-wrap:wrap;">
+        <button onclick="IrisVideoSubs.downloadSRT()" class="ds-btn ds-btn--primary" style="flex:1;">
+          <span class="material-symbols-outlined">download</span>
+          Descargar .SRT
+        </button>
+        <button onclick="IrisVideoSubs.downloadVTT()" class="ds-btn ds-btn--secondary" style="flex:1;">
+          <span class="material-symbols-outlined">download</span>
+          Descargar .VTT
+        </button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Bottom Nav — Docente -->
+  <nav class="ds-bottom-nav">
+    <button class="ds-nav-item" onclick="IrisApp.navigateTo('teacher-home')">
+      <span class="material-symbols-outlined">home</span>Home
+    </button>
+    <button class="ds-nav-item active">
+      <span class="material-symbols-outlined">subtitles</span>Subtítulos
+    </button>
+    <button class="ds-nav-item" onclick="IrisApp.navigateTo('transcription')">
+      <span class="material-symbols-outlined">speech_to_text</span>Clase
+    </button>
+    <button class="ds-nav-item" onclick="IrisApp.navigateTo('settings')">
+      <span class="material-symbols-outlined">settings</span>Config
+    </button>
+  </nav>
+</div>

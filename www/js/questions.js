@@ -11,16 +11,22 @@ const IrisQuestions = {
     init() {
         const textarea = document.getElementById('question-text');
         const btnSpeak = document.getElementById('btn-speak');
-        const btnSave = document.getElementById('btn-save');
+        const btnSave  = document.getElementById('btn-save');
 
         if (!textarea || !btnSpeak || !btnSave) return;
 
-        // Habilitar/deshabilitar botones según contenido del textarea
-        textarea.addEventListener('input', () => {
+        // Notificar al módulo TTS que esta página ya está en el DOM
+        // Esto puebla el selector de voces y habilita los botones
+        IrisTTS.onQuestionsPageMounted();
+
+        // Habilitar botones en cuanto haya texto — la voz es automática del navegador
+        const updateButtons = () => {
             const hasText = textarea.value.trim().length > 0;
             btnSpeak.disabled = !hasText;
-            btnSave.disabled = !hasText;
-        });
+            btnSave.disabled  = !hasText;
+        };
+
+        textarea.addEventListener('input', updateButtons);
 
         // Botón Reproducir
         btnSpeak.addEventListener('click', () => this.speakQuestion());
@@ -28,13 +34,11 @@ const IrisQuestions = {
         // Botón Guardar
         btnSave.addEventListener('click', () => this.saveQuestion());
 
-        // También permitir Ctrl+Enter para reproducir
+        // Ctrl+Enter para reproducir
         textarea.addEventListener('keydown', (e) => {
             if (e.ctrlKey && e.key === 'Enter') {
                 e.preventDefault();
-                if (textarea.value.trim()) {
-                    this.speakQuestion();
-                }
+                if (textarea.value.trim()) this.speakQuestion();
             }
         });
     },

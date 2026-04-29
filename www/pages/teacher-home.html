@@ -1,0 +1,116 @@
+<!-- pages/teacher-home.html — Dashboard del Docente -->
+<!-- Basado en mockup: teacher_dashboard/code.html -->
+<div id="page-teacher-home" class="ds-page active">
+
+  <!-- Top bar override for teacher -->
+  <header class="ds-topbar">
+    <span class="ds-topbar__brand">Un Mundo en Silencio</span>
+    <div style="display:flex;align-items:center;gap:0.75rem;">
+      <button class="ds-topbar__icon" onclick="IrisApp.navigateTo('settings')">
+        <span class="material-symbols-outlined">settings</span>
+      </button>
+      <div style="width:36px;height:36px;border-radius:50%;background:var(--c-surface-high);display:flex;align-items:center;justify-content:center;overflow:hidden;">
+        <span class="material-symbols-outlined" style="color:var(--c-primary);">person</span>
+      </div>
+    </div>
+  </header>
+
+  <div class="ds-content">
+    <!-- Welcome -->
+    <section style="margin-bottom:2rem;">
+      <h1 class="ds-section-title">Bienvenido, <span id="teacher-greeting-name">Docente</span></h1>
+      <p class="ds-section-sub">Gestiona tus transcripciones y contenido para un aprendizaje inclusivo.</p>
+    </section>
+
+    <!-- Quick actions -->
+    <div class="ds-bento" style="margin-bottom:1rem;">
+
+      <!-- Upload video — dark card -->
+      <div class="ds-card ds-card--dark" style="min-height:180px;display:flex;flex-direction:column;justify-content:space-between;cursor:pointer;" onclick="IrisApp.navigateTo('video-subtitles')">
+        <div style="display:flex;justify-content:space-between;">
+          <span class="material-symbols-outlined" style="font-size:2rem;">upload_file</span>
+          <span class="material-symbols-outlined" style="opacity:0;">arrow_forward</span>
+        </div>
+        <div>
+          <h3 style="font-family:var(--font-headline);font-weight:700;font-size:1.25rem;margin-bottom:0.25rem;">Subir Video</h3>
+          <p style="font-size:0.8125rem;opacity:.75;">Convierte videos educativos a formatos accesibles.</p>
+        </div>
+      </div>
+
+      <!-- Create sign avatar -->
+      <div class="ds-card" style="min-height:180px;display:flex;flex-direction:column;justify-content:space-between;cursor:pointer;">
+        <div style="display:flex;justify-content:space-between;">
+          <span class="material-symbols-outlined" style="font-size:2rem;color:var(--c-secondary);">accessibility_new</span>
+          <span class="material-symbols-outlined" style="color:var(--c-outline);opacity:0;">arrow_forward</span>
+        </div>
+        <div>
+          <h3 style="font-family:var(--font-headline);font-weight:700;font-size:1.25rem;color:var(--c-primary);margin-bottom:0.25rem;">Avatar de Señas</h3>
+          <p style="font-size:0.8125rem;color:var(--c-outline);">Personaliza gestos para tus estudiantes.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick stats -->
+    <div class="ds-card" style="margin-bottom:1rem;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
+        <h4 style="font-family:var(--font-headline);font-weight:700;font-size:0.875rem;text-transform:uppercase;letter-spacing:.08em;color:var(--c-primary);">Quick Stats</h4>
+        <span style="font-size:0.625rem;font-weight:700;background:rgba(0,106,106,.1);color:var(--c-secondary);padding:4px 10px;border-radius:999px;">LIVE</span>
+      </div>
+      <div class="ds-stats">
+        <div class="ds-stats__item">
+          <div class="ds-stats__num" id="stat-transcriptions">0</div>
+          <div class="ds-stats__label">Transcripciones</div>
+        </div>
+        <div class="ds-stats__item">
+          <div class="ds-stats__num" id="stat-subtitles">0</div>
+          <div class="ds-stats__label">Subtítulos</div>
+        </div>
+        <div class="ds-stats__item">
+          <div class="ds-stats__num" style="color:var(--c-secondary);">0</div>
+          <div class="ds-stats__label">Pendientes</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Iniciar clase en vivo -->
+    <button class="ds-btn ds-btn--primary ds-btn--full" onclick="IrisApp.navigateTo('transcription')" style="margin-bottom:1rem;">
+      <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">radio_button_checked</span>
+      Iniciar Clase en Vivo
+    </button>
+
+    <!-- Recent -->
+    <div class="ds-card">
+      <h4 style="font-family:var(--font-headline);font-weight:700;font-size:1rem;color:var(--c-primary);margin-bottom:1rem;">Actividad Reciente</h4>
+      <div id="teacher-recent-list">
+        <div style="display:flex;align-items:center;gap:1rem;padding:0.5rem 0;border-bottom:1px solid var(--c-surface-cont);">
+          <div style="width:44px;height:44px;border-radius:0.75rem;background:var(--c-sec-cont);display:flex;align-items:center;justify-content:center;">
+            <span class="material-symbols-outlined" style="color:var(--c-secondary);">description</span>
+          </div>
+          <div>
+            <p style="font-size:0.875rem;font-weight:700;color:var(--c-primary);">Sin sesiones aún</p>
+            <p style="font-size:0.75rem;color:var(--c-outline);">Inicia una clase para ver el historial</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom Nav — Docente -->
+  <nav class="ds-bottom-nav">
+    <button class="ds-nav-item active" onclick="IrisApp.navigateTo('teacher-home')" data-nav="teacher-home">
+      <span class="material-symbols-outlined">home</span>Home
+    </button>
+    <button class="ds-nav-item" onclick="IrisApp.navigateTo('transcription')" data-nav="transcription">
+      <span class="material-symbols-outlined">speech_to_text</span>Clase
+    </button>
+    <button class="ds-nav-item" onclick="IrisApp.navigateTo('video-subtitles')" data-nav="video-subtitles">
+      <span class="material-symbols-outlined">subtitles</span>Subtítulos
+    </button>
+    <button class="ds-nav-item" onclick="IrisApp.navigateTo('alerts')" data-nav="alerts">
+      <span class="material-symbols-outlined">notifications</span>Alertas
+    </button>
+    <button class="ds-nav-item" onclick="IrisApp.navigateTo('settings')" data-nav="settings">
+      <span class="material-symbols-outlined">settings</span>Config
+    </button>
+  </nav>
+</div>

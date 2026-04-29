@@ -1,0 +1,110 @@
+<!-- pages/admin-home.html — Dashboard del Administrador -->
+<!-- Basado en mockup: admin_dashboard/code.html -->
+<div id="page-admin-home" class="ds-page active">
+
+  <header class="ds-topbar">
+    <span class="ds-topbar__brand">Admin Portal</span>
+    <div style="display:flex;gap:0.5rem;">
+      <button class="ds-topbar__icon" style="position:relative;" onclick="IrisApp.navigateTo('alerts')">
+        <span class="material-symbols-outlined">notifications</span>
+        <span style="position:absolute;top:8px;right:8px;width:8px;height:8px;background:var(--c-error);border-radius:50%;"></span>
+      </button>
+    </div>
+  </header>
+
+  <div class="ds-layout-sidebar">
+    <!-- Sidebar desktop -->
+    <aside class="ds-sidebar">
+      <div style="margin-bottom:1.5rem;">
+        <h2 style="font-family:var(--font-headline);font-weight:900;font-size:1.25rem;color:var(--c-primary);">Admin Portal</h2>
+        <p style="font-size:0.8125rem;color:var(--c-outline);">Gestión del sistema</p>
+      </div>
+      <button class="ds-sidebar__link active" onclick="IrisApp.navigateTo('admin-home')">
+        <span class="material-symbols-outlined">dashboard</span>Dashboard
+      </button>
+      <button class="ds-sidebar__link" onclick="IrisApp.navigateTo('alerts')">
+        <span class="material-symbols-outlined">warning</span>Alertas
+      </button>
+      <button class="ds-sidebar__link" onclick="IrisApp.navigateTo('settings')">
+        <span class="material-symbols-outlined">settings_accessibility</span>Settings
+      </button>
+      <button class="ds-sidebar__link" onclick="IrisAuth.logout()">
+        <span class="material-symbols-outlined">logout</span>Cerrar Sesión
+      </button>
+    </aside>
+
+    <!-- Main content -->
+    <main style="flex:1;padding:1.5rem;padding-top:80px;padding-bottom:6rem;max-width:900px;">
+
+      <!-- Welcome -->
+      <section style="margin-bottom:2rem;">
+        <h1 class="ds-section-title">Bienvenido, <span id="admin-greeting-name">Admin</span></h1>
+        <p class="ds-section-sub">Panel de control del sistema Un Mundo en Silencio.</p>
+      </section>
+
+      <!-- Hero stats -->
+      <div class="ds-bento" style="margin-bottom:1rem;">
+        <div class="ds-card" style="padding:1.5rem;">
+          <span style="font-size:0.6875rem;font-weight:700;color:var(--c-secondary);text-transform:uppercase;letter-spacing:.08em;display:block;margin-bottom:0.5rem;">Estado del Sistema</span>
+          <h3 style="font-family:var(--font-headline);font-weight:900;font-size:2rem;color:var(--c-primary);">Óptimo</h3>
+          <p style="font-size:0.8125rem;color:var(--c-outline);margin-top:0.25rem;">Todos los nodos operacionales.</p>
+        </div>
+
+        <div class="ds-card ds-card--dark" style="padding:1.5rem;">
+          <span style="font-size:0.6875rem;font-weight:700;opacity:.7;text-transform:uppercase;letter-spacing:.08em;display:block;margin-bottom:0.5rem;">Usuarios Activos</span>
+          <h3 style="font-family:var(--font-headline);font-weight:900;font-size:2rem;" id="admin-user-count">—</h3>
+          <p style="font-size:0.8125rem;opacity:.7;margin-top:0.25rem;">Estudiantes y docentes.</p>
+        </div>
+      </div>
+
+      <!-- Stats bar -->
+      <div class="ds-card" style="margin-bottom:1rem;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
+          <h4 style="font-family:var(--font-headline);font-weight:700;font-size:0.875rem;text-transform:uppercase;letter-spacing:.08em;color:var(--c-primary);">Ecosistema Activo</h4>
+        </div>
+        <div class="ds-stats">
+          <div class="ds-stats__item">
+            <div class="ds-stats__num" id="admin-stat-students">—</div>
+            <div class="ds-stats__label">Estudiantes</div>
+          </div>
+          <div class="ds-stats__item">
+            <div class="ds-stats__num" id="admin-stat-teachers">—</div>
+            <div class="ds-stats__label">Docentes</div>
+          </div>
+          <div class="ds-stats__item">
+            <div class="ds-stats__num" style="color:var(--c-error);" id="admin-stat-alerts">—</div>
+            <div class="ds-stats__label">Alertas</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div style="display:flex;flex-direction:column;gap:0.75rem;">
+        <button class="ds-btn ds-btn--primary ds-btn--full" onclick="IrisApp.navigateTo('alerts')">
+          <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">campaign</span>
+          Enviar Alerta de Emergencia
+        </button>
+        <button class="ds-btn ds-btn--outline ds-btn--full" onclick="IrisAuth.logout()">
+          <span class="material-symbols-outlined">logout</span>
+          Cerrar Sesión
+        </button>
+      </div>
+    </main>
+  </div>
+
+  <!-- Bottom Nav — Admin (mobile) -->
+  <nav class="ds-bottom-nav" style="display:flex;">
+    <button class="ds-nav-item active" onclick="IrisApp.navigateTo('admin-home')">
+      <span class="material-symbols-outlined">home</span>Home
+    </button>
+    <button class="ds-nav-item" onclick="IrisApp.navigateTo('alerts')">
+      <span class="material-symbols-outlined">warning</span>Alertas
+    </button>
+    <button class="ds-nav-item" onclick="IrisApp.navigateTo('settings')">
+      <span class="material-symbols-outlined">settings</span>Config
+    </button>
+    <button class="ds-nav-item" onclick="IrisAuth.logout()">
+      <span class="material-symbols-outlined">logout</span>Salir
+    </button>
+  </nav>
+</div>

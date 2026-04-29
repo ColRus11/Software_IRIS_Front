@@ -1,109 +1,38 @@
 /**
- * IRIS - Módulo API
+ * IRIS / Un Mundo en Silencio — API Module
  * Comunicación con el backend Django REST
  */
 const IrisAPI = {
-    /**
-     * Obtener headers para las peticiones
-     */
     getHeaders() {
-        const headers = {
-            'Content-Type': 'application/json',
-        };
-        // Agregar Firebase token si existe
-        const user = IrisAuth.currentUser;
-        if (user && user.uid) {
-            headers['X-Firebase-UID'] = user.uid;
-        }
-        return headers;
+        const h = { 'Content-Type': 'application/json' };
+        if (IrisAuth.currentUser?.uid) h['X-Firebase-UID'] = IrisAuth.currentUser.uid;
+        if (IrisAuth.currentRole)      h['X-User-Role']    = IrisAuth.currentRole;
+        return h;
     },
 
-    /**
-     * Crear una nueva pregunta
-     * @param {Object} data - { text, session_name, firebase_uid }
-     * @returns {Promise<Object>}
-     */
-    async createQuestion(data) {
-        try {
-            const response = await fetch(`${IRIS_CONFIG.API_URL}/questions/`, {
-                method: 'POST',
-                headers: this.getHeaders(),
-                body: JSON.stringify(data),
-            });
-            if (!response.ok) {
-                throw new Error(`Error ${response.status}: ${response.statusText}`);
-            }
-            return await response.json();
-        } catch (error) {
-            console.error('API createQuestion error:', error);
-            throw error;
-        }
+    async _req(path, options = {}) {
+        const res = await fetch(`${IRIS_CONFIG.API_URL}${path}`, {
+            headers: this.getHeaders(), ...options,
+        });
+        if (!res.ok) throw new Error(`Error ${res.status}: ${res.statusText}`);
+        return res.status === 204 ? null : res.json();
     },
 
-    /**
-     * Obtener preguntas del usuario
-     * @param {string} firebaseUid - UID de Firebase
-     * @param {string} session - (opcional) filtrar por sesión
-     * @returns {Promise<Object>}
-     */
-    async getQuestions(firebaseUid, session = null) {
-        try {
-            let url = `${IRIS_CONFIG.API_URL}/questions/?firebase_uid=${encodeURIComponent(firebaseUid)}`;
-            if (session) {
-                url += `&session=${encodeURIComponent(session)}`;
-            }
-            const response = await fetch(url, {
-                method: 'GET',
-                headers: this.getHeaders(),
-            });
-            if (!response.ok) {
-                throw new Error(`Error ${response.status}: ${response.statusText}`);
-            }
-            return await response.json();
-        } catch (error) {
-            console.error('API getQuestions error:', error);
-            throw error;
-        }
-    },
+    // ── Questions (existente) ──────────────────────
+    createQuestion: (data) => IrisAPI._req('/questions/', { method: 'POST', body: JSON.stringify(data) }),
+    getQuestions:   (uid, session) => IrisAPI._req(`/questions/?firebase_uid=${encodeURIComponent(uid)}${session ? '&session='+encodeURIComponent(session) : ''}`),
+    markSpoken:     (id)  => IrisAPI._req(`/questions/${id}/mark_spoken/`, { method: 'PATCH' }),
+    deleteQuestion: (id)  => IrisAPI._req(`/questions/${id}/`, { method: 'DELETE' }),
 
-    /**
-     * Marcar pregunta como reproducida con voz
-     * @param {number} questionId
-     * @returns {Promise<Object>}
-     */
-    async markSpoken(questionId) {
-        try {
-            const response = await fetch(`${IRIS_CONFIG.API_URL}/questions/${questionId}/mark_spoken/`, {
-                method: 'PATCH',
-                headers: this.getHeaders(),
-            });
-            if (!response.ok) {
-                throw new Error(`Error ${response.status}: ${response.statusText}`);
-            }
-            return await response.json();
-        } catch (error) {
-            console.error('API markSpoken error:', error);
-            throw error;
-        }
-    },
+    // ── Alerts (nuevo) ────────────────────────────
+    getAlerts:    ()     => IrisAPI._req('/alerts/'),
+    createAlert:  (data) => IrisAPI._req('/alerts/', { method: 'POST', body: JSON.stringify(data) }),
 
-    /**
-     * Eliminar pregunta
-     * @param {number} questionId
-     * @returns {Promise<void>}
-     */
-    async deleteQuestion(questionId) {
-        try {
-            const response = await fetch(`${IRIS_CONFIG.API_URL}/questions/${questionId}/`, {
-                method: 'DELETE',
-                headers: this.getHeaders(),
-            });
-            if (!response.ok) {
-                throw new Error(`Error ${response.status}: ${response.statusText}`);
-            }
-        } catch (error) {
-            console.error('API deleteQuestion error:', error);
-            throw error;
-        }
-    },
+    // ── Transcriptions (nuevo) ────────────────────
+    getTranscriptions:    ()     => IrisAPI._req('/transcriptions/'),
+    createTranscription:  (data) => IrisAPI._req('/transcriptions/', { method: 'POST', body: JSON.stringify(data) }),
+
+    // ── User Profile (nuevo) ──────────────────────
+    getUserProfile:  (uid)  => IrisAPI._req(`/users/profile/?firebase_uid=${encodeURIComponent(uid)}`),
+    saveUserProfile: (data) => IrisAPI._req('/users/profile/', { method: 'POST', body: JSON.stringify(data) }),
 };
