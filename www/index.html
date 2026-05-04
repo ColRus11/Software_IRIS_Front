@@ -61,6 +61,9 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 
+  <!-- Cordova (requerido para plugins nativos, en navegador Cordova inyecta uno mock) -->
+  <script src="cordova.js"></script>
+
   <!-- App Modules -->
   <script src="js/config.js"></script>
   <script src="js/firestore.js"></script>
@@ -70,8 +73,35 @@
   <script src="js/notifications.js"></script>
   <script src="js/audio-monitor.js"></script>
   <script src="js/questions.js"></script>
-  <script src="js/transcription.js"></script>
   <script src="js/video-subtitles.js"></script>
-  <script src="js/app.js"></script>
+
+  <!-- Carga Condicional de Transcripción y App.js -->
+  <script>
+    // Esperar 1 segundo para asegurar la detección de Cordova
+    setTimeout(() => {
+      // Solo usar la versión Cordova nativa si estamos en iOS o Android. 
+      // Si estamos en 'browser' (cordova run browser) o en servidor web normal, usar web.
+      const isMobileCordova = window.cordova && ['ios', 'android'].includes(window.cordova.platformId);
+      
+      const scriptTranscription = document.createElement('script');
+      scriptTranscription.src = isMobileCordova ? 'js/transcription-cordova.js' : 'js/transcription.js';
+      
+      scriptTranscription.onload = () => {
+        // Una vez cargado el módulo de transcripción, cargamos el app.js principal
+        const scriptApp = document.createElement('script');
+        scriptApp.src = 'js/app.js';
+        scriptApp.onload = () => {
+          // Como app.js se cargó de forma asíncrona, el evento DOMContentLoaded 
+          // ya pasó, así que debemos inicializar la app manualmente.
+          if (typeof IrisApp !== 'undefined') {
+            IrisApp.init();
+          }
+        };
+        document.body.appendChild(scriptApp);
+      };
+
+      document.body.appendChild(scriptTranscription);
+    }, 1000);
+  </script>
 </body>
 </html>

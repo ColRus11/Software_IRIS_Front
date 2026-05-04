@@ -82,7 +82,7 @@ const IrisQuestions = {
     },
 
     /**
-     * Guardar pregunta en el backend
+     * Guardar pregunta en un archivo local .txt
      * @param {string} text
      * @param {boolean} wasSpoken
      */

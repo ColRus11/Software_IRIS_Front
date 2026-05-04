@@ -271,11 +271,27 @@ const IrisApp = {
     async saveTranscript() {
         const text = IrisTranscription.currentTranscript.trim();
         if (!text) { this.showToast('ℹ️ Nada que guardar aún'); return; }
+        
+        // 1. Descargar localmente como archivo .txt
         try {
-            await IrisAPI.createQuestion({ text, session_name: 'Transcripción', firebase_uid: IrisAuth.currentUser?.uid || 'anon' });
-            this.showToast('✅ Transcripción guardada');
-        } catch (e) {
-            this.showToast('❌ Error al guardar: ' + e.message);
+            const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            
+            const dateStr = new Date().toISOString().slice(0,10);
+            const timeStr = new Date().toLocaleTimeString('es-CO').replace(/:/g, '-');
+            a.download = `Transcripcion_${dateStr}_${timeStr}.txt`;
+            
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            this.showToast('✅ Transcripción guardada (Archivo .txt)');
+        } catch (err) {
+            console.error('Error generando archivo:', err);
+            this.showToast('❌ Error al generar el archivo');
         }
     },
 

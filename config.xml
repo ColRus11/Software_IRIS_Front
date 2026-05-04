@@ -10,4 +10,12 @@
     <content src="index.html" />
     <allow-intent href="http://*/*" />
     <allow-intent href="https://*/*" />
+    <platform name="ios">
+        <edit-config target="NSMicrophoneUsageDescription" file="*-Info.plist" mode="merge">
+            <string>Necesitamos el micrófono para transcribir la voz en tiempo real durante las clases.</string>
+        </edit-config>
+        <edit-config target="NSSpeechRecognitionUsageDescription" file="*-Info.plist" mode="merge">
+            <string>Necesitamos el reconocimiento de voz para convertir tu voz a texto en tiempo real.</string>
+        </edit-config>
+    </platform>
 </widget>
