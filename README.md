@@ -6,11 +6,8 @@ al clonar el repositorio en la raiz se debe ejecutar:
 
 probar el front en navegador
 
-    python3 -m http.server 8080
+    cordova run browser
 
-en el enlace: 
-
-    http://localhost:8080/www/
 
 probar en simulador, al hacer una modificacion en la carpeta www/, se debe actualizar la carpeta www/ de la plataforma a usar
 actualizar para IOS:
