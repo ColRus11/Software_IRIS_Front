@@ -10,6 +10,56 @@ const IrisApp = {
     _transcribing: false,
 
     // ——————————————————————————————————————
+    // NAV DINÁMICO POR ROL
+    // ——————————————————————————————————————
+    _navConfig: {
+        Student: [
+            { page: 'student-home',  icon: 'home',              label: 'Home'    },
+            { page: 'transcription', icon: 'speech_to_text',    label: 'Clase'   },
+            { page: 'questions',     icon: 'record_voice_over', label: 'Voz'     },
+            { page: 'alerts',        icon: 'notifications',     label: 'Alertas' },
+            { page: 'settings',      icon: 'settings',          label: 'Config'  },
+        ],
+        Teacher: [
+            { page: 'teacher-home',    icon: 'home',           label: 'Home'       },
+            { page: 'transcription',   icon: 'speech_to_text', label: 'Clase'      },
+            { page: 'video-subtitles', icon: 'subtitles',      label: 'Subtítulos' },
+            { page: 'alerts',          icon: 'notifications',  label: 'Alertas'    },
+            { page: 'settings',        icon: 'settings',       label: 'Config'     },
+        ],
+        Admin: [
+            { page: 'admin-home', icon: 'home',     label: 'Home'    },
+            { page: 'alerts',     icon: 'warning',  label: 'Alertas' },
+            { page: 'settings',   icon: 'settings', label: 'Config'  },
+            { action: 'logout',   icon: 'logout',   label: 'Salir'   },
+        ],
+    },
+
+    // Sub-páginas que no tienen ítem propio en el nav → se marca su padre
+    _navParentMap: {
+        'history':         'questions',
+        'video-subtitles': 'video-subtitles',
+    },
+
+    _renderNav(currentPage) {
+        const nav = document.getElementById('app-nav');
+        if (!nav) return;
+        const role       = IrisAuth.currentRole || 'Student';
+        const items      = this._navConfig[role] || this._navConfig.Student;
+        const activePage = this._navParentMap[currentPage] || currentPage;
+
+        nav.innerHTML = items.map(item => {
+            const isActive = item.page === activePage;
+            const onClick  = item.action === 'logout'
+                ? `IrisAuth.logout()`
+                : `IrisApp.navigateTo('${item.page}')`;
+            return `<button class="ds-nav-item${isActive ? ' active' : ''}" onclick="${onClick}">
+                <span class="material-symbols-outlined">${item.icon}</span>${item.label}
+            </button>`;
+        }).join('');
+    },
+
+    // ——————————————————————————————————————
     // INIT
     // ——————————————————————————————————————
     async init() {
@@ -60,11 +110,17 @@ const IrisApp = {
         this._setupSettings();
         this._updateGreeting(user);
         IrisQuestions.init();
+        // Mostrar nav global al iniciar sesión
+        const appNav = document.getElementById('app-nav');
+        if (appNav) appNav.style.display = '';
         this.navigateTo(homePage);
     },
 
     onUserLogout() {
         this._ready = false; // permite re-inicializar si vuelve a hacer login
+        // Ocultar nav global al cerrar sesión
+        const appNav = document.getElementById('app-nav');
+        if (appNav) appNav.style.display = 'none';
         // Resetear flag del form para que se pueda re-vincular
         const form = document.getElementById('login-form');
         if (form) form._setup = false;
@@ -83,16 +139,14 @@ const IrisApp = {
         this.currentPage = page;
 
         // Acciones específicas de página
-        if (page === 'history')     IrisQuestions.loadHistory();
-        if (page === 'alerts')      this._loadAlerts();
+        if (page === 'history')       IrisQuestions.loadHistory();
+        if (page === 'alerts')        this._loadAlerts();
         if (page === 'transcription') this._setupTranscriptionPage();
-        if (page === 'settings')    this._updateSettingsDisplay();
-        if (page === 'questions')   IrisTTS.onQuestionsPageMounted();
+        if (page === 'settings')      this._updateSettingsDisplay();
+        if (page === 'questions')     IrisTTS.onQuestionsPageMounted();
 
-        // Actualizar nav activo
-        document.querySelectorAll('[data-nav]').forEach(el => {
-            el.classList.toggle('active', el.dataset.nav === page);
-        });
+        // Renderizar nav dinámico por rol (no aplica en login)
+        if (page !== 'login') this._renderNav(page);
     },
 
     goHome() {
