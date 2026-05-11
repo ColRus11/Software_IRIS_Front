@@ -1,16 +1,15 @@
-<!-- pages/login.html — Pantalla de Login con selección de Rol -->
-<!-- Basado en mockup: login_role_selection_1/code.html + LoginPage.xaml del compañero -->
+<!-- pages/login.html — Login + Registro completo con selección de Rol -->
 <div id="page-login" class="ds-page active" style="background:var(--c-surface); align-items:center; justify-content:center; padding: 2rem 1.5rem;">
 
   <div style="width:100%; max-width:420px;">
 
     <!-- Brand -->
-    <div style="text-align:center; margin-bottom:2.5rem;">
+    <div style="text-align:center; margin-bottom:2rem;">
       <div style="width:72px;height:72px;background:var(--grad-primary);border-radius:1.25rem;display:inline-flex;align-items:center;justify-content:center;margin-bottom:1rem;box-shadow:var(--shadow-md);">
         <span class="material-symbols-outlined" style="color:white;font-size:36px;">hearing</span>
       </div>
       <h1 style="font-family:var(--font-headline);font-weight:900;font-size:1.75rem;color:var(--c-primary);letter-spacing:-.03em;">Un Mundo en Silencio</h1>
-      <p style="color:var(--c-on-surf-var);margin-top:0.25rem;font-size:0.9375rem;">Inicia sesión para continuar</p>
+      <p id="login-subtitle" style="color:var(--c-on-surf-var);margin-top:0.25rem;font-size:0.9375rem;">Inicia sesión para continuar</p>
     </div>
 
     <!-- Role selector -->
@@ -34,13 +33,27 @@
 
     <!-- Form -->
     <form id="login-form" autocomplete="off" style="display:flex;flex-direction:column;gap:1rem;">
+
+      <!-- Campo Nombre — solo en modo registro -->
+      <div id="field-name" style="display:none;" class="ds-input-group">
+        <label for="login-name">Nombre Completo</label>
+        <input class="ds-input" id="login-name" type="text" placeholder="Ej. Ana García">
+      </div>
+
       <div class="ds-input-group">
         <label for="login-email">Correo Electrónico</label>
-        <input class="ds-input" id="login-email" type="email" placeholder="ejemplo@unmundo.edu" required>
+        <input class="ds-input" id="login-email" type="email" placeholder="usuario@universidad.edu.co" required>
       </div>
+
       <div class="ds-input-group">
         <label for="login-password">Contraseña</label>
         <input class="ds-input" id="login-password" type="password" placeholder="••••••••" required minlength="6">
+      </div>
+
+      <!-- Confirmar contraseña — solo en registro -->
+      <div id="field-confirm" style="display:none;" class="ds-input-group">
+        <label for="login-confirm">Confirmar Contraseña</label>
+        <input class="ds-input" id="login-confirm" type="password" placeholder="••••••••" minlength="6">
       </div>
 
       <span id="login-error" class="ds-error"></span>
@@ -51,7 +64,7 @@
       </button>
     </form>
 
-    <!-- Secondary links -->
+    <!-- Toggle login / registro -->
     <div style="display:flex;flex-direction:column;align-items:center;gap:0.75rem;margin-top:1.5rem;">
       <button id="login-toggle" style="background:none;border:none;font-size:0.875rem;font-weight:600;color:var(--c-secondary);cursor:pointer;">
         ¿No tienes cuenta? Regístrate
@@ -65,7 +78,7 @@
 
     <footer style="text-align:center;margin-top:2rem;">
       <p style="font-size:0.625rem;font-weight:700;color:var(--c-outline);text-transform:uppercase;letter-spacing:.1em;">Iniciativa Universitaria de Accesibilidad</p>
-      <p style="font-size:0.6875rem;color:var(--c-outline-var);margin-top:2px;">© 2024 Un Mundo en Silencio</p>
+      <p style="font-size:0.6875rem;color:var(--c-outline-var);margin-top:2px;">© 2025 Un Mundo en Silencio</p>
     </footer>
   </div>
 </div>

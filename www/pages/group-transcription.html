@@ -1,0 +1,104 @@
+<!-- pages/group-transcription.html — Transcripción Grupal Multi-Hablante -->
+<div id="page-group-transcription" class="ds-page">
+  <div class="ds-content">
+
+    <!-- Header con estado de captura -->
+    <section style="display:flex;align-items:center;justify-content:space-between;padding:0.75rem 1rem;background:var(--c-surface-white);border-radius:var(--r-lg);margin-bottom:1rem;box-shadow:var(--shadow-sm);">
+      <div style="display:flex;align-items:center;gap:0.75rem;">
+        <div id="gt-live-dot" style="width:10px;height:10px;border-radius:50%;background:var(--c-outline-var);"></div>
+        <div>
+          <p style="font-size:0.6875rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--c-outline);" id="gt-status-label">Inactivo</p>
+          <p style="font-size:0.875rem;font-weight:600;color:var(--c-primary);">Transcripción Grupal</p>
+        </div>
+      </div>
+      <div id="gt-live-badge" style="display:none;padding:3px 10px;background:var(--c-sec-cont);color:var(--c-secondary);font-size:0.625rem;font-weight:700;border-radius:999px;text-transform:uppercase;">LIVE</div>
+    </section>
+
+    <!-- Nombre de sesión -->
+    <div class="ds-input-group" style="margin-bottom:1rem;">
+      <label for="gt-session-name">Nombre de la sesión (opcional)</label>
+      <input class="ds-input" id="gt-session-name" type="text" placeholder="Ej: Debate Cálculo I — Grupo 3">
+    </div>
+
+    <!-- Selector de hablante activo -->
+    <div style="margin-bottom:1rem;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.5rem;">
+        <p style="font-size:0.75rem;font-weight:700;color:var(--c-outline);text-transform:uppercase;letter-spacing:.08em;">Hablantes</p>
+        <p style="font-size:0.6875rem;color:var(--c-outline);">Usa <strong>+</strong> / <strong>−</strong> para ajustar la cantidad</p>
+      </div>
+      <div id="gt-speaker-btns">
+        <!-- Renderizado por JS -->
+      </div>
+    </div>
+
+    <!-- Controles principales -->
+    <div style="display:flex;gap:0.75rem;margin-bottom:0.5rem;">
+      <button id="gt-btn-start" class="ds-btn ds-btn--primary ds-btn--full" onclick="IrisGroupTranscription.toggle()">
+        <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">mic</span>
+        <span id="gt-btn-text">Iniciar</span>
+      </button>
+    </div>
+    <div style="display:flex;gap:0.75rem;margin-bottom:1rem;">
+      <button class="ds-btn ds-btn--outline" style="flex:1;height:48px;" onclick="IrisGroupTranscription.nextSpeaker()">
+        <span class="material-symbols-outlined">switch_account</span>
+        Cambiar Hablante
+      </button>
+      <button class="ds-btn ds-btn--outline" style="height:48px;width:48px;padding:0;flex-shrink:0;" onclick="IrisGroupTranscription.clear()" title="Limpiar todo">
+        <span class="material-symbols-outlined">delete_sweep</span>
+      </button>
+    </div>
+
+    <!-- Stream de burbujas de transcripción -->
+    <div id="gt-stream" style="display:flex;flex-direction:column;gap:0.75rem;margin-bottom:1rem;min-height:160px;">
+      <!-- Estado vacío -->
+      <div id="gt-empty" style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:3rem 1rem;color:var(--c-outline);text-align:center;">
+        <span class="material-symbols-outlined" style="font-size:48px;opacity:.35;">record_voice_over</span>
+        <p style="margin-top:0.75rem;font-size:0.875rem;">Presiona <strong>Iniciar</strong> y habla.<br>Usa <strong>Cambiar hablante</strong> cuando tome la palabra otra persona.</p>
+      </div>
+    </div>
+
+    <!-- Burbuja de texto en curso (interim) -->
+    <div id="gt-interim-wrap" style="display:none;padding:0.75rem 1rem;background:var(--c-surface-cont);border-radius:var(--r-lg);margin-bottom:1rem;border-left:3px solid var(--c-secondary);">
+      <p style="font-size:0.75rem;font-weight:700;color:var(--c-secondary);margin-bottom:4px;" id="gt-interim-speaker">Speaker 1</p>
+      <p style="font-size:0.9375rem;color:var(--c-on-surface);opacity:.65;font-style:italic;" id="gt-interim-text"></p>
+    </div>
+
+    <!-- Guardar -->
+    <button class="ds-btn ds-btn--secondary ds-btn--full" onclick="IrisGroupTranscription.save()" id="gt-btn-save" disabled>
+      <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">save</span>
+      <span id="gt-save-text">Guardar Sesión Grupal</span>
+    </button>
+
+    <!-- Info -->
+    <div style="margin-top:1rem;padding:1rem;background:var(--c-sec-cont);border-radius:var(--r-lg);display:flex;align-items:center;gap:0.75rem;">
+      <span class="material-symbols-outlined" style="color:var(--c-secondary);font-variation-settings:'FILL' 1;flex-shrink:0;">info</span>
+      <p style="font-size:0.8125rem;color:var(--c-secondary);font-weight:500;">Toca <strong>Cambiar hablante</strong> cada vez que una persona diferente comience a hablar.</p>
+    </div>
+
+    <!-- Historial de sesiones grupales -->
+    <div style="margin-top:1.5rem;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.75rem;">
+        <p style="font-size:0.75rem;font-weight:700;color:var(--c-outline);text-transform:uppercase;letter-spacing:.08em;">Sesiones anteriores</p>
+        <button onclick="IrisGroupTranscription.loadHistory()" style="background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:4px;font-size:0.75rem;color:var(--c-secondary);font-weight:600;font-family:var(--font-body);">
+          <span class="material-symbols-outlined" style="font-size:16px;">refresh</span>Actualizar
+        </button>
+      </div>
+
+      <div id="gt-history-loading" style="display:none;text-align:center;padding:1.5rem;">
+        <div style="width:28px;height:28px;border:3px solid var(--c-outline-var);border-top-color:var(--c-secondary);border-radius:50%;animation:ds-spin 0.8s linear infinite;margin:0 auto;"></div>
+      </div>
+
+      <div id="gt-history-empty" style="display:none;text-align:center;padding:2rem;color:var(--c-outline);">
+        <span class="material-symbols-outlined" style="font-size:40px;opacity:.35;">history</span>
+        <p style="margin-top:0.5rem;font-size:0.875rem;">No hay sesiones guardadas aún</p>
+      </div>
+
+      <div id="gt-history-list" style="display:flex;flex-direction:column;gap:0.75rem;"></div>
+    </div>
+
+  </div>
+</div>
+
+<style>
+@keyframes ds-spin { to { transform: rotate(360deg); } }
+</style>

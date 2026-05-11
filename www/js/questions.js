@@ -185,32 +185,32 @@ const IrisQuestions = {
         const timeStr = date.toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' });
         const dateStr = date.toLocaleDateString('es-CO', { day: 'numeric', month: 'short' });
         const spokenBadge = q.was_spoken
-            ? '<span class="iris-history__item-badge">🔊 Reproducida</span>'
+            ? '<span style="background:var(--c-sec-cont);color:var(--c-secondary);padding:2px 8px;border-radius:999px;font-size:0.6875rem;font-weight:700;">Reproducida</span>'
             : '';
         const sessionBadge = q.session_name
-            ? `<span style="background:var(--iris-primary);color:white;padding:2px 8px;border-radius:10px;font-size:0.7rem;">${this._escapeHtml(q.session_name)}</span>`
+            ? `<span style="background:var(--c-surface-high);color:var(--c-on-surf-var);padding:2px 8px;border-radius:999px;font-size:0.6875rem;font-weight:600;">${this._escapeHtml(q.session_name)}</span>`
             : '';
 
+        const iconName = q.was_spoken ? 'volume_up' : 'chat_bubble';
+        const iconColor = q.was_spoken ? 'var(--c-secondary)' : 'var(--c-outline)';
         return `
-            <li class="iris-history__item">
-                <div class="iris-history__item-icon ${q.was_spoken ? 'spoken' : ''}">
-                    <i class="material-icons">${q.was_spoken ? 'volume_up' : 'chat_bubble'}</i>
+            <li style="display:flex;align-items:flex-start;gap:0.75rem;padding:0.75rem;background:var(--c-surface-white);border-radius:var(--r-lg);border:1px solid rgba(0,0,0,.04);">
+                <div style="width:36px;height:36px;border-radius:var(--r-md);background:var(--c-surface-high);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                    <span class="material-symbols-outlined" style="font-size:18px;color:${iconColor};font-variation-settings:'FILL' 1;">${iconName}</span>
                 </div>
-                <div class="iris-history__item-content">
-                    <div class="iris-history__item-text">${this._escapeHtml(q.text)}</div>
-                    <div class="iris-history__item-meta">
-                        <span>${timeStr} · ${dateStr}</span>
+                <div style="flex:1;min-width:0;">
+                    <p style="font-size:0.9375rem;color:var(--c-on-surface);line-height:1.5;word-break:break-word;">${this._escapeHtml(q.text)}</p>
+                    <div style="display:flex;flex-wrap:wrap;gap:0.5rem;margin-top:0.375rem;align-items:center;">
+                        <span style="font-size:0.75rem;color:var(--c-outline);">${timeStr} · ${dateStr}</span>
                         ${spokenBadge}
                         ${sessionBadge}
                     </div>
                 </div>
-                <div class="iris-history__item-actions">
-                    <button class="iris-btn iris-btn--outline iris-btn--small"
-                            data-action="replay" data-text="${this._escapeAttr(q.text)}"
-                            title="Reproducir de nuevo" aria-label="Reproducir esta pregunta">
-                        <i class="material-icons">volume_up</i>
-                    </button>
-                </div>
+                <button style="background:none;border:1.5px solid var(--c-outline-var);border-radius:var(--r-md);width:36px;height:36px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;"
+                        data-action="replay" data-text="${this._escapeAttr(q.text)}"
+                        title="Reproducir de nuevo">
+                    <span class="material-symbols-outlined" style="font-size:18px;color:var(--c-primary);">volume_up</span>
+                </button>
             </li>
         `;
     },

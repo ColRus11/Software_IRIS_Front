@@ -65,6 +65,27 @@
       <span class="material-symbols-outlined" style="color:var(--c-secondary);font-variation-settings:'FILL' 1;">info</span>
       <p style="font-size:0.8125rem;color:var(--c-secondary);font-weight:500;">Transcripción gratuita con Web Speech API. Necesitas conexión a internet y micrófono.</p>
     </div>
+
+    <!-- Historial de sesiones -->
+    <div style="margin-top:1.5rem;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.75rem;">
+        <p style="font-size:0.75rem;font-weight:700;color:var(--c-outline);text-transform:uppercase;letter-spacing:.08em;">Sesiones guardadas</p>
+        <button onclick="IrisApp.loadTranscriptionHistory()" style="background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:4px;font-size:0.75rem;color:var(--c-secondary);font-weight:600;font-family:var(--font-body);">
+          <span class="material-symbols-outlined" style="font-size:16px;">refresh</span>Actualizar
+        </button>
+      </div>
+
+      <div id="transcription-history-loading" style="display:none;text-align:center;padding:1.5rem;">
+        <div style="width:28px;height:28px;border:3px solid var(--c-outline-var);border-top-color:var(--c-secondary);border-radius:50%;animation:ds-spin 0.8s linear infinite;margin:0 auto;"></div>
+      </div>
+
+      <div id="transcription-history-empty" style="display:none;text-align:center;padding:2rem;color:var(--c-outline);">
+        <span class="material-symbols-outlined" style="font-size:40px;opacity:.35;">history</span>
+        <p style="margin-top:0.5rem;font-size:0.875rem;">No hay sesiones guardadas aún</p>
+      </div>
+
+      <ul id="transcription-history-list" style="list-style:none;display:flex;flex-direction:column;gap:0.5rem;"></ul>
+    </div>
   </div>
 
 </div>

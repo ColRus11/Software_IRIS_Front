@@ -14,11 +14,12 @@ const IrisApp = {
     // ——————————————————————————————————————
     _navConfig: {
         Student: [
-            { page: 'student-home',  icon: 'home',              label: 'Home'    },
-            { page: 'transcription', icon: 'speech_to_text',    label: 'Clase'   },
-            { page: 'questions',     icon: 'record_voice_over', label: 'Voz'     },
-            { page: 'alerts',        icon: 'notifications',     label: 'Alertas' },
-            { page: 'settings',      icon: 'settings',          label: 'Config'  },
+            { page: 'student-home',        icon: 'home',              label: 'Home'    },
+            { page: 'transcription',       icon: 'speech_to_text',    label: 'Clase'   },
+            { page: 'group-transcription', icon: 'group',             label: 'Grupo'   },
+            { page: 'questions',           icon: 'record_voice_over', label: 'Voz'     },
+            { page: 'alerts',              icon: 'notifications',     label: 'Alertas' },
+            { page: 'settings',            icon: 'settings',          label: 'Config'  },
         ],
         Teacher: [
             { page: 'teacher-home',    icon: 'home',           label: 'Home'       },
@@ -39,6 +40,7 @@ const IrisApp = {
     _navParentMap: {
         'history':         'questions',
         'video-subtitles': 'video-subtitles',
+        'group-transcription': 'group-transcription',
     },
 
     _renderNav(currentPage) {
@@ -102,6 +104,9 @@ const IrisApp = {
         await this._loadPage('history');
         await this._loadPage('alerts');
         await this._loadPage('settings');
+        if (IrisAuth.currentRole === 'Student') {
+            await this._loadPage('group-transcription');
+        }
         // Cargar video-subtitles solo para docente
         if (IrisAuth.currentRole === 'Teacher') {
             await this._loadPage('video-subtitles');
@@ -139,11 +144,12 @@ const IrisApp = {
         this.currentPage = page;
 
         // Acciones específicas de página
-        if (page === 'history')       IrisQuestions.loadHistory();
-        if (page === 'alerts')        this._loadAlerts();
-        if (page === 'transcription') this._setupTranscriptionPage();
-        if (page === 'settings')      this._updateSettingsDisplay();
-        if (page === 'questions')     IrisTTS.onQuestionsPageMounted();
+        if (page === 'history')            IrisQuestions.loadHistory();
+        if (page === 'alerts')             this._loadAlerts();
+        if (page === 'transcription')      this._setupTranscriptionPage();
+        if (page === 'settings')           this._updateSettingsDisplay();
+        if (page === 'questions')          IrisTTS.onQuestionsPageMounted();
+        if (page === 'group-transcription') IrisGroupTranscription.onPageMounted();
 
         // Renderizar nav dinámico por rol (no aplica en login)
         if (page !== 'login') this._renderNav(page);
@@ -173,8 +179,9 @@ const IrisApp = {
             'questions':       'pages/questions.html',
             'history':         'pages/history.html',
             'alerts':          'pages/alerts.html',
-            'settings':        'pages/settings.html',
-            'video-subtitles': 'pages/video-subtitles.html',
+            'settings':             'pages/settings.html',
+            'video-subtitles':      'pages/video-subtitles.html',
+            'group-transcription':  'pages/group-transcription.html',
         };
         const path = fileMap[page];
         if (!path) return;
@@ -212,13 +219,24 @@ const IrisApp = {
         form._setup = true;
 
         let isRegister = false;
-        const toggleBtn = document.getElementById('login-toggle');
+
+        const toggleBtn    = document.getElementById('login-toggle');
+        const fieldName    = document.getElementById('field-name');
+        const fieldConfirm = document.getElementById('field-confirm');
+        const subtitle     = document.getElementById('login-subtitle');
+
         if (toggleBtn) {
             toggleBtn.addEventListener('click', () => {
                 isRegister = !isRegister;
-                document.getElementById('login-btn-text').textContent = isRegister ? 'Registrarse' : 'Log In';
+                document.getElementById('login-btn-text').textContent = isRegister ? 'Crear Cuenta' : 'Log In';
                 toggleBtn.textContent = isRegister ? '¿Ya tienes cuenta? Inicia sesión' : '¿No tienes cuenta? Regístrate';
+                if (subtitle) subtitle.textContent = isRegister ? 'Crea tu cuenta para continuar' : 'Inicia sesión para continuar';
+                if (fieldName)    fieldName.style.display    = isRegister ? '' : 'none';
+                if (fieldConfirm) fieldConfirm.style.display = isRegister ? '' : 'none';
                 document.getElementById('login-error').textContent = '';
+                // El nombre es requerido solo en registro
+                const nameInput = document.getElementById('login-name');
+                if (nameInput) nameInput.required = isRegister;
             });
         }
 
@@ -232,6 +250,13 @@ const IrisApp = {
 
             if (!email || !password) { errorEl.textContent = 'Completa todos los campos'; return; }
 
+            if (isRegister) {
+                const name    = document.getElementById('login-name')?.value.trim();
+                const confirm = document.getElementById('login-confirm')?.value;
+                if (!name)              { errorEl.textContent = 'El nombre es requerido'; return; }
+                if (password !== confirm) { errorEl.textContent = 'Las contraseñas no coinciden'; return; }
+            }
+
             submitBtn.disabled = true;
             const orig = btnText.textContent;
             btnText.textContent = 'Cargando...';
@@ -239,7 +264,8 @@ const IrisApp = {
 
             try {
                 if (isRegister) {
-                    await IrisAuth.register(email, password, this.selectedRole);
+                    const name = document.getElementById('login-name').value.trim();
+                    await IrisAuth.register(email, password, this.selectedRole, name);
                     this.showToast('✅ Cuenta creada — bienvenido');
                 } else {
                     await IrisAuth.login(email, password, this.selectedRole);
@@ -274,6 +300,7 @@ const IrisApp = {
         if (!IrisTranscription.isSupported()) {
             this.showToast('⚠️ Tu navegador no soporta reconocimiento de voz');
         }
+        this.loadTranscriptionHistory();
     },
 
     toggleTranscription() {
@@ -323,30 +350,79 @@ const IrisApp = {
     },
 
     async saveTranscript() {
-        const text = IrisTranscription.currentTranscript.trim();
+        const finalText   = IrisTranscription.currentTranscript.trim();
+        const interimText = document.getElementById('transcript-interim')?.textContent.trim() || '';
+        const text        = (finalText + ' ' + interimText).trim();
         if (!text) { this.showToast('ℹ️ Nada que guardar aún'); return; }
-        
-        // 1. Descargar localmente como archivo .txt
+
+        const sessionName = document.getElementById('transcript-session-name')?.textContent?.trim() || '';
+
         try {
-            const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            
-            const dateStr = new Date().toISOString().slice(0,10);
-            const timeStr = new Date().toLocaleTimeString('es-CO').replace(/:/g, '-');
-            a.download = `Transcripcion_${dateStr}_${timeStr}.txt`;
-            
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-            
-            this.showToast('✅ Transcripción guardada (Archivo .txt)');
+            await IrisAPI.createTranscription({ transcript: text, session_name: sessionName });
+            this.showToast('💾 Sesión guardada');
+            this.clearTranscript();
+            await this.loadTranscriptionHistory();
         } catch (err) {
-            console.error('Error generando archivo:', err);
-            this.showToast('❌ Error al generar el archivo');
+            console.warn('Backend no disponible, guardando localmente:', err);
+            const local = JSON.parse(localStorage.getItem('iris_local_transcriptions') || '[]');
+            local.unshift({ transcript: text, session_name: sessionName, created_at: new Date().toISOString(), id: Date.now() });
+            localStorage.setItem('iris_local_transcriptions', JSON.stringify(local));
+            this.showToast('💾 Guardada localmente');
+            this.clearTranscript();
+            await this.loadTranscriptionHistory();
         }
+    },
+
+    async loadTranscriptionHistory() {
+        const list    = document.getElementById('transcription-history-list');
+        const empty   = document.getElementById('transcription-history-empty');
+        const loading = document.getElementById('transcription-history-loading');
+        if (!list) return;
+
+        if (loading) loading.style.display = 'block';
+        if (empty)   empty.style.display   = 'none';
+        list.innerHTML = '';
+
+        let sessions = [];
+        try {
+            const raw = await IrisAPI.getTranscriptions();
+            sessions  = raw?.results ?? (Array.isArray(raw) ? raw : []);
+        } catch (_) {
+            sessions = JSON.parse(localStorage.getItem('iris_local_transcriptions') || '[]');
+        }
+
+        if (loading) loading.style.display = 'none';
+
+        if (sessions.length === 0) {
+            const local = JSON.parse(localStorage.getItem('iris_local_transcriptions') || '[]');
+            sessions = local;
+        }
+
+        if (sessions.length === 0) {
+            if (empty) empty.style.display = 'block';
+            return;
+        }
+
+        list.innerHTML = sessions.map(s => {
+            const date    = new Date(s.created_at);
+            const dateStr = date.toLocaleDateString('es-CO', { day: 'numeric', month: 'short' });
+            const timeStr = date.toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' });
+            const preview = (s.transcript || '').slice(0, 120);
+            const name    = s.session_name ? `<span style="font-size:0.6875rem;font-weight:700;padding:2px 8px;background:var(--c-sec-cont);color:var(--c-secondary);border-radius:999px;">${s.session_name}</span>` : '';
+            return `<li style="padding:0.875rem 1rem;background:var(--c-surface-white);border-radius:var(--r-lg);border:1px solid rgba(0,0,0,.04);">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.375rem;">
+                    <span style="font-size:0.75rem;color:var(--c-outline);">${timeStr} · ${dateStr}</span>
+                    ${name}
+                </div>
+                <p style="font-size:0.875rem;color:var(--c-on-surface);line-height:1.5;">${this._escapeHtml(preview)}${(s.transcript || '').length > 120 ? '…' : ''}</p>
+            </li>`;
+        }).join('');
+    },
+
+    _escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
     },
 
     // ——————————————————————————————————————
@@ -365,7 +441,8 @@ const IrisApp = {
         list.innerHTML = '';
 
         try {
-            const alerts = await IrisAPI.getAlerts();
+            const raw    = await IrisAPI.getAlerts();
+            const alerts = raw?.results ?? (Array.isArray(raw) ? raw : []);
             if (loading) loading.style.display = 'none';
             if (!alerts || alerts.length === 0) {
                 list.innerHTML = `<div style="text-align:center;padding:3rem;color:var(--c-outline);">
@@ -440,12 +517,17 @@ const IrisApp = {
     // ——————————————————————————————————————
     _setupSettings() {
         // Theme
+        const _applyThemeBtn = (activeTheme) => {
+            document.querySelectorAll('.iris-theme-btn').forEach(b => {
+                b.style.borderColor = b.dataset.theme === activeTheme ? 'var(--c-secondary)' : 'transparent';
+            });
+        };
+        _applyThemeBtn(localStorage.getItem('iris_theme') || 'light');
         document.querySelectorAll('.iris-theme-btn').forEach(btn => {
             btn.addEventListener('click', () => {
                 document.documentElement.setAttribute('data-theme', btn.dataset.theme);
                 localStorage.setItem('iris_theme', btn.dataset.theme);
-                document.querySelectorAll('.iris-theme-btn').forEach(b => b.style.borderColor = 'transparent');
-                btn.style.borderColor = 'var(--c-secondary)';
+                _applyThemeBtn(btn.dataset.theme);
             });
         });
 

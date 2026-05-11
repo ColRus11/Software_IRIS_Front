@@ -1,25 +1,12 @@
 /**
  * IRIS / Un Mundo en Silencio — Configuración Global
- * Firebase proyecto: unpaused-app
+ * Auth: Django JWT (djangorestframework-simplejwt)
  */
 const IRIS_CONFIG = {
-    // Django API URL (development)
+    // Django API URL — desarrollo local
     API_URL: 'http://localhost:8000/api',
 
-    // Firebase — credenciales reales del proyecto
-    FIREBASE: {
-        apiKey:            "AIzaSyAeA6H1i3GQsnLXak7-fNg-v71vVWvVlQY",
-        authDomain:        "unpaused-app.firebaseapp.com",
-        projectId:         "unpaused-app",
-        storageBucket:     "unpaused-app.firebasestorage.app",
-        messagingSenderId: "358160506187",
-        appId:             "1:358160506187:web:6bdf8e7c73ac8c0b00dcce"
-    },
-
-    // Firestore REST base URL
-    FIRESTORE_URL: "https://firestore.googleapis.com/v1/projects/unpaused-app/databases/(default)/documents",
-
-    // Valores por defecto de TTS
+    // TTS por defecto
     TTS: {
         rate:  1.0,
         pitch: 1.0,

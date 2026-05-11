@@ -314,3 +314,121 @@ body {
 .ds-sidebar__link.active, .ds-sidebar__link:hover {
   background: rgba(0,106,106,.1); color: var(--c-secondary);
 }
+
+/* ============================================
+   TEMAS — Dark & High-contrast
+   ============================================ */
+
+[data-theme="dark"] {
+  --c-primary:          #90caf9;
+  --c-primary-cont:     #bbdefb;
+  --c-secondary:        #4dd0d0;
+  --c-sec-cont:         #004d4d;
+  --c-surface:          #0d1117;
+  --c-surface-low:      #111820;
+  --c-surface-cont:     #161e27;
+  --c-surface-high:     #1c2733;
+  --c-surface-highest:  #22303f;
+  --c-surface-white:    #1a2332;
+  --c-outline:          #8b949e;
+  --c-outline-var:      #30363d;
+  --c-on-surface:       #e6edf3;
+  --c-on-surf-var:      #b1bac4;
+  --c-on-primary:       #0d1117;
+  --c-on-secondary:     #0d1117;
+  --c-error:            #f85149;
+  --c-error-cont:       #3d1a1a;
+  --grad-primary:       linear-gradient(135deg, #0d1117 0%, #161e27 100%);
+}
+
+[data-theme="dark"] body { background: var(--c-surface); color: var(--c-on-surface); }
+
+[data-theme="dark"] .ds-topbar,
+[data-theme="dark"] .ds-nav { background: var(--c-surface-cont); border-color: var(--c-outline-var); }
+
+[data-theme="dark"] .ds-card { background: var(--c-surface-high); border-color: var(--c-outline-var); }
+
+[data-theme="dark"] .ds-input,
+[data-theme="dark"] select,
+[data-theme="dark"] textarea {
+  background: var(--c-surface-cont) !important;
+  color: var(--c-on-surface) !important;
+  border-color: var(--c-outline-var) !important;
+}
+
+[data-theme="dark"] .ds-btn--primary { background: var(--c-secondary); color: var(--c-on-secondary); }
+[data-theme="dark"] .ds-btn--outline  { border-color: var(--c-outline); color: var(--c-on-surf-var); }
+
+[data-theme="dark"] .iris-theme-btn { background: var(--c-surface-high) !important; color: var(--c-on-surface) !important; }
+
+/* ---- High Contrast ---- */
+
+[data-theme="high-contrast"] {
+  --c-primary:          #ffffff;
+  --c-primary-cont:     #eeeeee;
+  --c-secondary:        #ffff00;
+  --c-sec-cont:         #333300;
+  --c-surface:          #000000;
+  --c-surface-low:      #0a0a0a;
+  --c-surface-cont:     #111111;
+  --c-surface-high:     #1a1a1a;
+  --c-surface-highest:  #222222;
+  --c-surface-white:    #111111;
+  --c-outline:          #aaaaaa;
+  --c-outline-var:      #555555;
+  --c-on-surface:       #ffffff;
+  --c-on-surf-var:      #dddddd;
+  --c-on-primary:       #000000;
+  --c-on-secondary:     #000000;
+  --c-error:            #ff4444;
+  --c-error-cont:       #330000;
+  --grad-primary:       linear-gradient(135deg, #000000 0%, #111111 100%);
+}
+
+[data-theme="high-contrast"] body { background: #000; color: #fff; }
+
+[data-theme="high-contrast"] .ds-topbar,
+[data-theme="high-contrast"] .ds-nav {
+  background: #000;
+  border: 2px solid #ffff00;
+}
+
+[data-theme="high-contrast"] .ds-card {
+  background: #111;
+  border: 2px solid #fff;
+}
+
+[data-theme="high-contrast"] .ds-btn--primary {
+  background: #ffff00;
+  color: #000;
+  border: 2px solid #ffff00;
+  font-weight: 800;
+}
+
+[data-theme="high-contrast"] .ds-btn--secondary {
+  background: #fff;
+  color: #000;
+  border: 2px solid #fff;
+  font-weight: 800;
+}
+
+[data-theme="high-contrast"] .ds-btn--outline {
+  border: 2px solid #fff;
+  color: #fff;
+  background: transparent;
+}
+
+[data-theme="high-contrast"] .ds-input,
+[data-theme="high-contrast"] select,
+[data-theme="high-contrast"] textarea {
+  background: #000 !important;
+  color: #fff !important;
+  border: 2px solid #fff !important;
+}
+
+[data-theme="high-contrast"] .iris-theme-btn { background: #111 !important; color: #fff !important; }
+
+[data-theme="high-contrast"] .ds-nav-item.active {
+  color: #ffff00;
+  border-color: #ffff00;
+}

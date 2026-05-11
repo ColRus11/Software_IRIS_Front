@@ -1,38 +1,63 @@
 /**
  * IRIS / Un Mundo en Silencio — API Module
- * Comunicación con el backend Django REST
+ * Comunicación con el backend Django REST + JWT
  */
 const IrisAPI = {
-    getHeaders() {
-        const h = { 'Content-Type': 'application/json' };
-        if (IrisAuth.currentUser?.uid) h['X-Firebase-UID'] = IrisAuth.currentUser.uid;
-        if (IrisAuth.currentRole)      h['X-User-Role']    = IrisAuth.currentRole;
-        return h;
+    _getHeaders() {
+        const token = IrisAuth.getAccessToken();
+        return {
+            'Content-Type':  'application/json',
+            ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+        };
     },
 
     async _req(path, options = {}) {
         const res = await fetch(`${IRIS_CONFIG.API_URL}${path}`, {
-            headers: this.getHeaders(), ...options,
+            headers: this._getHeaders(), ...options,
         });
-        if (!res.ok) throw new Error(`Error ${res.status}: ${res.statusText}`);
+
+        // Token expirado — intentar refresh y reintentar una vez
+        if (res.status === 401) {
+            const refreshed = await IrisAuth.refreshToken();
+            if (refreshed) {
+                const retry = await fetch(`${IRIS_CONFIG.API_URL}${path}`, {
+                    headers: this._getHeaders(), ...options,
+                });
+                if (!retry.ok) throw new Error(`Error ${retry.status}: ${retry.statusText}`);
+                return retry.status === 204 ? null : retry.json();
+            }
+            // Refresh falló — sesión inválida
+            IrisAuth.logout();
+            throw new Error('Sesión expirada. Inicia sesión de nuevo.');
+        }
+
+        if (!res.ok) {
+            let msg = `Error ${res.status}: ${res.statusText}`;
+            try { const e = await res.json(); msg = e.detail || e.error || msg; } catch {}
+            throw new Error(msg);
+        }
         return res.status === 204 ? null : res.json();
     },
 
-    // ── Questions (existente) ──────────────────────
-    createQuestion: (data) => IrisAPI._req('/questions/', { method: 'POST', body: JSON.stringify(data) }),
-    getQuestions:   (uid, session) => IrisAPI._req(`/questions/?firebase_uid=${encodeURIComponent(uid)}${session ? '&session='+encodeURIComponent(session) : ''}`),
-    markSpoken:     (id)  => IrisAPI._req(`/questions/${id}/mark_spoken/`, { method: 'PATCH' }),
-    deleteQuestion: (id)  => IrisAPI._req(`/questions/${id}/`, { method: 'DELETE' }),
+    // ── Questions ──────────────────────────────────
+    createQuestion: (data)    => IrisAPI._req('/questions/', { method: 'POST', body: JSON.stringify(data) }),
+    getQuestions:   (session) => IrisAPI._req(`/questions/${session ? '?session=' + encodeURIComponent(session) : ''}`),
+    markSpoken:     (id)      => IrisAPI._req(`/questions/${id}/mark_spoken/`, { method: 'PATCH' }),
+    deleteQuestion: (id)      => IrisAPI._req(`/questions/${id}/`, { method: 'DELETE' }),
 
-    // ── Alerts (nuevo) ────────────────────────────
-    getAlerts:    ()     => IrisAPI._req('/alerts/'),
-    createAlert:  (data) => IrisAPI._req('/alerts/', { method: 'POST', body: JSON.stringify(data) }),
+    // ── Alerts ─────────────────────────────────────
+    getAlerts:   ()     => IrisAPI._req('/alerts/'),
+    createAlert: (data) => IrisAPI._req('/alerts/', { method: 'POST', body: JSON.stringify(data) }),
 
-    // ── Transcriptions (nuevo) ────────────────────
-    getTranscriptions:    ()     => IrisAPI._req('/transcriptions/'),
-    createTranscription:  (data) => IrisAPI._req('/transcriptions/', { method: 'POST', body: JSON.stringify(data) }),
+    // ── Transcriptions ─────────────────────────────
+    getTranscriptions:   ()     => IrisAPI._req('/transcriptions/'),
+    createTranscription: (data) => IrisAPI._req('/transcriptions/', { method: 'POST', body: JSON.stringify(data) }),
 
-    // ── User Profile (nuevo) ──────────────────────
-    getUserProfile:  (uid)  => IrisAPI._req(`/users/profile/?firebase_uid=${encodeURIComponent(uid)}`),
-    saveUserProfile: (data) => IrisAPI._req('/users/profile/', { method: 'POST', body: JSON.stringify(data) }),
+    // ── Group Transcriptions ───────────────────────
+    getGroupSessions:         ()     => IrisAPI._req('/group-transcriptions/'),
+    createGroupSession:       (data) => IrisAPI._req('/group-transcriptions/', { method: 'POST', body: JSON.stringify(data) }),
+
+    // ── User Profile ───────────────────────────────
+    getMe:        ()     => IrisAPI._req('/auth/me/'),
+    updateMe:     (data) => IrisAPI._req('/auth/me/', { method: 'PATCH', body: JSON.stringify(data) }),
 };
