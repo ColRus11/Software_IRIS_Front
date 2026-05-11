@@ -220,6 +220,14 @@ const IrisApp = {
         if (!IrisTranscription.isSupported()) {
             this.showToast('⚠️ Tu navegador no soporta reconocimiento de voz');
         }
+        
+        // Mostrar contenedor de guardado local si estamos en Cordova (móvil)
+        const isMobileCordova = window.cordova && ['ios', 'android'].includes(window.cordova.platformId);
+        const localContainer = document.getElementById('local-transcripts-container');
+        if (isMobileCordova && localContainer) {
+            localContainer.style.display = 'block';
+            this._renderLocalTranscripts();
+        }
     },
 
     toggleTranscription() {
@@ -272,27 +280,101 @@ const IrisApp = {
         const text = IrisTranscription.currentTranscript.trim();
         if (!text) { this.showToast('ℹ️ Nada que guardar aún'); return; }
         
-        // 1. Descargar localmente como archivo .txt
-        try {
-            const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
+        const isMobileCordova = window.cordova && ['ios', 'android'].includes(window.cordova.platformId);
+        
+        if (isMobileCordova) {
+            // Guardar localmente en el dispositivo
+            const localTranscripts = JSON.parse(localStorage.getItem('iris_local_transcripts') || '[]');
+            localTranscripts.unshift({
+                id: Date.now(),
+                text: text,
+                created_at: new Date().toISOString()
+            });
+            localStorage.setItem('iris_local_transcripts', JSON.stringify(localTranscripts));
             
-            const dateStr = new Date().toISOString().slice(0,10);
-            const timeStr = new Date().toLocaleTimeString('es-CO').replace(/:/g, '-');
-            a.download = `Transcripcion_${dateStr}_${timeStr}.txt`;
-            
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-            
-            this.showToast('✅ Transcripción guardada (Archivo .txt)');
-        } catch (err) {
-            console.error('Error generando archivo:', err);
-            this.showToast('❌ Error al generar el archivo');
+            this.showToast('💾 Transcripción guardada localmente');
+            this._renderLocalTranscripts();
+        } else {
+            // Web: Descargar localmente como archivo .txt
+            try {
+                const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                
+                const dateStr = new Date().toISOString().slice(0,10);
+                const timeStr = new Date().toLocaleTimeString('es-CO').replace(/:/g, '-');
+                a.download = `Transcripcion_${dateStr}_${timeStr}.txt`;
+                
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                
+                this.showToast('✅ Transcripción guardada (Archivo .txt)');
+            } catch (err) {
+                console.error('Error generando archivo:', err);
+                this.showToast('❌ Error al generar el archivo');
+            }
         }
+    },
+
+    _renderLocalTranscripts() {
+        const list = document.getElementById('local-transcripts-list');
+        const empty = document.getElementById('local-transcripts-empty');
+        if (!list) return;
+
+        const localTranscripts = JSON.parse(localStorage.getItem('iris_local_transcripts') || '[]');
+        
+        if (localTranscripts.length === 0) {
+            list.innerHTML = '';
+            if (empty) empty.style.display = 'block';
+            return;
+        }
+
+        if (empty) empty.style.display = 'none';
+
+        list.innerHTML = localTranscripts.map(t => {
+            const date = new Date(t.created_at);
+            const timeStr = date.toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' });
+            const dateStr = date.toLocaleDateString('es-CO', { day: 'numeric', month: 'short' });
+            
+            return `
+            <li class="iris-history__item" style="position:relative;background:var(--c-surface-white);padding:1rem;border-radius:var(--r-lg);box-shadow:var(--shadow-sm);margin-bottom:0.5rem;display:flex;justify-content:space-between;align-items:flex-start;">
+                <div style="flex:1;padding-right:1rem;">
+                    <p style="font-size:0.9375rem;color:var(--c-on-surface);margin-bottom:0.5rem;line-height:1.4;">${this._escapeHtml(t.text)}</p>
+                    <span style="font-size:0.75rem;color:var(--c-outline);">${dateStr} • ${timeStr}</span>
+                </div>
+                <div class="dropdown" style="position:relative;">
+                    <button onclick="const menu = this.nextElementSibling; menu.style.display = menu.style.display === 'block' ? 'none' : 'block'" style="background:none;border:none;color:var(--c-outline);cursor:pointer;padding:0;">
+                        <span class="material-symbols-outlined">more_vert</span>
+                    </button>
+                    <div style="display:none;position:absolute;right:0;top:100%;background:white;box-shadow:0 4px 12px rgba(0,0,0,0.1);border-radius:8px;z-index:10;min-width:120px;overflow:hidden;border:1px solid var(--c-outline-var);">
+                        <button onclick="IrisApp.deleteLocalTranscript(${t.id})" style="width:100%;text-align:left;padding:0.75rem 1rem;background:none;border:none;color:#dc2626;cursor:pointer;font-family:var(--font-body);font-size:0.875rem;display:flex;align-items:center;gap:0.5rem;">
+                            <span class="material-symbols-outlined" style="font-size:18px;">delete</span> Borrar
+                        </button>
+                    </div>
+                </div>
+            </li>
+            `;
+        }).join('');
+    },
+
+    deleteLocalTranscript(id) {
+        let localTranscripts = JSON.parse(localStorage.getItem('iris_local_transcripts') || '[]');
+        localTranscripts = localTranscripts.filter(t => t.id !== id);
+        localStorage.setItem('iris_local_transcripts', JSON.stringify(localTranscripts));
+        this._renderLocalTranscripts();
+        this.showToast('🗑️ Transcripción eliminada');
+    },
+
+    _escapeHtml(unsafe) {
+        return (unsafe || '').toString()
+             .replace(/&/g, "&amp;")
+             .replace(/</g, "&lt;")
+             .replace(/>/g, "&gt;")
+             .replace(/"/g, "&quot;")
+             .replace(/'/g, "&#039;");
     },
 
     // ——————————————————————————————————————

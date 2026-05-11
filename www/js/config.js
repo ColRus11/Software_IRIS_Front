@@ -3,8 +3,8 @@
  * Firebase proyecto: unpaused-app
  */
 const IRIS_CONFIG = {
-    // Django API URL (development)
-    API_URL: 'http://localhost:8000/api',
+    // Django API URL (production)
+    API_URL: 'https://softwareirisback-production.up.railway.app/api',
 
     // Firebase — credenciales reales del proyecto
     FIREBASE: {
