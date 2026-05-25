@@ -14,43 +14,44 @@ const IrisApp = {
     // ——————————————————————————————————————
     _navConfig: {
         Student: [
-            { page: 'student-home',  icon: 'home',              label: 'Home'    },
-            { page: 'transcription', icon: 'speech_to_text',    label: 'Clase'   },
-            { page: 'questions',     icon: 'record_voice_over', label: 'Voz'     },
-            { page: 'alerts',        icon: 'notifications',     label: 'Alertas' },
-            { page: 'settings',      icon: 'settings',          label: 'Config'  },
+            { page: 'student-home', icon: 'home', label: 'Home' },
+            { page: 'transcription', icon: 'speech_to_text', label: 'Clase' },
+            { page: 'questions', icon: 'record_voice_over', label: 'Voz' },
+            { page: 'alerts', icon: 'notifications', label: 'Alertas' },
+            { page: 'settings', icon: 'settings', label: 'Config' },
+            { page: 'avatar', icon: 'face', label: 'Avatar' },
         ],
         Teacher: [
-            { page: 'teacher-home',    icon: 'home',           label: 'Home'       },
-            { page: 'transcription',   icon: 'speech_to_text', label: 'Clase'      },
-            { page: 'video-subtitles', icon: 'subtitles',      label: 'Subtítulos' },
-            { page: 'alerts',          icon: 'notifications',  label: 'Alertas'    },
-            { page: 'settings',        icon: 'settings',       label: 'Config'     },
+            { page: 'teacher-home', icon: 'home', label: 'Home' },
+            { page: 'transcription', icon: 'speech_to_text', label: 'Clase' },
+            { page: 'video-subtitles', icon: 'subtitles', label: 'Subtítulos' },
+            { page: 'alerts', icon: 'notifications', label: 'Alertas' },
+            { page: 'settings', icon: 'settings', label: 'Config' },
         ],
         Admin: [
-            { page: 'admin-home', icon: 'home',     label: 'Home'    },
-            { page: 'alerts',     icon: 'warning',  label: 'Alertas' },
-            { page: 'settings',   icon: 'settings', label: 'Config'  },
-            { action: 'logout',   icon: 'logout',   label: 'Salir'   },
+            { page: 'admin-home', icon: 'home', label: 'Home' },
+            { page: 'alerts', icon: 'warning', label: 'Alertas' },
+            { page: 'settings', icon: 'settings', label: 'Config' },
+            { action: 'logout', icon: 'logout', label: 'Salir' },
         ],
     },
 
     // Sub-páginas que no tienen ítem propio en el nav → se marca su padre
     _navParentMap: {
-        'history':         'questions',
+        'history': 'questions',
         'video-subtitles': 'video-subtitles',
     },
 
     _renderNav(currentPage) {
         const nav = document.getElementById('app-nav');
         if (!nav) return;
-        const role       = IrisAuth.currentRole || 'Student';
-        const items      = this._navConfig[role] || this._navConfig.Student;
+        const role = IrisAuth.currentRole || 'Student';
+        const items = this._navConfig[role] || this._navConfig.Student;
         const activePage = this._navParentMap[currentPage] || currentPage;
 
         nav.innerHTML = items.map(item => {
             const isActive = item.page === activePage;
-            const onClick  = item.action === 'logout'
+            const onClick = item.action === 'logout'
                 ? `IrisAuth.logout()`
                 : `IrisApp.navigateTo('${item.page}')`;
             return `<button class="ds-nav-item${isActive ? ' active' : ''}" onclick="${onClick}">
@@ -102,6 +103,7 @@ const IrisApp = {
         await this._loadPage('history');
         await this._loadPage('alerts');
         await this._loadPage('settings');
+        await this._loadPage('avatar');
         // Cargar video-subtitles solo para docente
         if (IrisAuth.currentRole === 'Teacher') {
             await this._loadPage('video-subtitles');
@@ -110,6 +112,7 @@ const IrisApp = {
         this._setupSettings();
         this._updateGreeting(user);
         IrisQuestions.init();
+        IrisAvatar.init();
         // Mostrar nav global al iniciar sesión
         const appNav = document.getElementById('app-nav');
         if (appNav) appNav.style.display = '';
@@ -139,12 +142,12 @@ const IrisApp = {
         this.currentPage = page;
 
         // Acciones específicas de página
-        if (page === 'history')       IrisQuestions.loadHistory();
-        if (page === 'alerts')        this._loadAlerts();
+        if (page === 'history') IrisQuestions.loadHistory();
+        if (page === 'alerts') this._loadAlerts();
         if (page === 'transcription') this._setupTranscriptionPage();
-        if (page === 'settings')      this._updateSettingsDisplay();
-        if (page === 'questions')     IrisTTS.onQuestionsPageMounted();
-
+        if (page === 'settings') this._updateSettingsDisplay();
+        if (page === 'questions') IrisTTS.onQuestionsPageMounted();
+        if (page === 'avatar') IrisAvatar.init();
         // Renderizar nav dinámico por rol (no aplica en login)
         if (page !== 'login') this._renderNav(page);
     },
@@ -155,7 +158,7 @@ const IrisApp = {
 
     _homePageForRole(role) {
         if (role === 'Teacher') return 'teacher-home';
-        if (role === 'Admin')   return 'admin-home';
+        if (role === 'Admin') return 'admin-home';
         return 'student-home';
     },
 
@@ -165,16 +168,17 @@ const IrisApp = {
     async _loadPage(page) {
         if (this._loadedPages[page]) return;
         const fileMap = {
-            'login':           'pages/login.html',
-            'student-home':    'pages/student-home.html',
-            'teacher-home':    'pages/teacher-home.html',
-            'admin-home':      'pages/admin-home.html',
-            'transcription':   'pages/transcription.html',
-            'questions':       'pages/questions.html',
-            'history':         'pages/history.html',
-            'alerts':          'pages/alerts.html',
-            'settings':        'pages/settings.html',
+            'login': 'pages/login.html',
+            'student-home': 'pages/student-home.html',
+            'teacher-home': 'pages/teacher-home.html',
+            'admin-home': 'pages/admin-home.html',
+            'transcription': 'pages/transcription.html',
+            'questions': 'pages/questions.html',
+            'history': 'pages/history.html',
+            'alerts': 'pages/alerts.html',
+            'settings': 'pages/settings.html',
             'video-subtitles': 'pages/video-subtitles.html',
+            'avatar': 'pages/avatar.html',
         };
         const path = fileMap[page];
         if (!path) return;
@@ -224,11 +228,11 @@ const IrisApp = {
 
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const email    = document.getElementById('login-email').value.trim();
+            const email = document.getElementById('login-email').value.trim();
             const password = document.getElementById('login-password').value;
-            const errorEl  = document.getElementById('login-error');
-            const submitBtn= document.getElementById('login-submit');
-            const btnText  = document.getElementById('login-btn-text');
+            const errorEl = document.getElementById('login-error');
+            const submitBtn = document.getElementById('login-submit');
+            const btnText = document.getElementById('login-btn-text');
 
             if (!email || !password) { errorEl.textContent = 'Completa todos los campos'; return; }
 
@@ -286,9 +290,9 @@ const IrisApp = {
         } else {
             const started = IrisTranscription.start(
                 (text, isFinal) => {
-                    const empty   = document.getElementById('transcript-empty');
+                    const empty = document.getElementById('transcript-empty');
                     const content = document.getElementById('transcript-content');
-                    const textEl  = document.getElementById('transcript-text');
+                    const textEl = document.getElementById('transcript-text');
                     const interim = document.getElementById('transcript-interim');
                     if (empty) empty.style.display = 'none';
                     if (content) content.style.display = 'block';
@@ -297,7 +301,7 @@ const IrisApp = {
                     else if (interim) interim.textContent = '';
                 },
                 (err) => this.showToast('❌ Error de micrófono: ' + err),
-                ()    => { this._transcribing = false; document.getElementById('btn-transcript-text').textContent = 'Iniciar Transcripción'; }
+                () => { this._transcribing = false; document.getElementById('btn-transcript-text').textContent = 'Iniciar Transcripción'; }
             );
             if (started) {
                 this._transcribing = true;
@@ -312,9 +316,9 @@ const IrisApp = {
 
     clearTranscript() {
         IrisTranscription.clear();
-        const textEl  = document.getElementById('transcript-text');
+        const textEl = document.getElementById('transcript-text');
         const interim = document.getElementById('transcript-interim');
-        const empty   = document.getElementById('transcript-empty');
+        const empty = document.getElementById('transcript-empty');
         const content = document.getElementById('transcript-content');
         if (textEl) textEl.textContent = '';
         if (interim) interim.textContent = '';
@@ -325,23 +329,23 @@ const IrisApp = {
     async saveTranscript() {
         const text = IrisTranscription.currentTranscript.trim();
         if (!text) { this.showToast('ℹ️ Nada que guardar aún'); return; }
-        
+
         // 1. Descargar localmente como archivo .txt
         try {
             const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            
-            const dateStr = new Date().toISOString().slice(0,10);
+
+            const dateStr = new Date().toISOString().slice(0, 10);
             const timeStr = new Date().toLocaleTimeString('es-CO').replace(/:/g, '-');
             a.download = `Transcripcion_${dateStr}_${timeStr}.txt`;
-            
+
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
-            
+
             this.showToast('✅ Transcripción guardada (Archivo .txt)');
         } catch (err) {
             console.error('Error generando archivo:', err);
@@ -375,7 +379,7 @@ const IrisApp = {
             }
             alerts.forEach(a => {
                 const color = a.severity === 'emergency' ? 'var(--c-error)' : a.severity === 'warning' ? '#f59e0b' : 'var(--c-secondary)';
-                const icon  = a.severity === 'emergency' ? 'emergency' : a.severity === 'warning' ? 'warning' : 'info';
+                const icon = a.severity === 'emergency' ? 'emergency' : a.severity === 'warning' ? 'warning' : 'info';
                 list.innerHTML += `
                   <div class="ds-alert-item ds-alert-item--${a.severity}">
                     <div class="ds-alert-item__icon" style="background:${color}20;">
@@ -393,12 +397,12 @@ const IrisApp = {
         }
     },
 
-    showNewAlertForm()  { document.getElementById('new-alert-form')?.style.setProperty('display','block'); },
-    hideNewAlertForm()  { document.getElementById('new-alert-form')?.style.setProperty('display','none'); },
+    showNewAlertForm() { document.getElementById('new-alert-form')?.style.setProperty('display', 'block'); },
+    hideNewAlertForm() { document.getElementById('new-alert-form')?.style.setProperty('display', 'none'); },
 
     async submitAlert() {
-        const title    = document.getElementById('alert-title')?.value.trim();
-        const message  = document.getElementById('alert-message')?.value.trim();
+        const title = document.getElementById('alert-title')?.value.trim();
+        const message = document.getElementById('alert-message')?.value.trim();
         const severity = document.getElementById('alert-severity')?.value;
         if (!title || !message) { this.showToast('Completa título y mensaje'); return; }
         try {
@@ -419,7 +423,7 @@ const IrisApp = {
         const name = profile?.displayName || (user.email ? user.email.split('@')[0] : 'Usuario');
         const display = name.charAt(0).toUpperCase() + name.slice(1);
 
-        ['student-greeting-name','teacher-greeting-name','admin-greeting-name'].forEach(id => {
+        ['student-greeting-name', 'teacher-greeting-name', 'admin-greeting-name'].forEach(id => {
             const el = document.getElementById(id);
             if (el) el.textContent = display;
         });
@@ -460,12 +464,12 @@ const IrisApp = {
         });
 
         // TTS sliders
-        const rateSlider  = document.getElementById('voice-rate');
-        const rateLabel   = document.getElementById('voice-rate-label');
+        const rateSlider = document.getElementById('voice-rate');
+        const rateLabel = document.getElementById('voice-rate-label');
         const pitchSlider = document.getElementById('voice-pitch');
-        const pitchLabel  = document.getElementById('voice-pitch-label');
-        if (rateSlider)  rateSlider.addEventListener('input',  e => { IrisTTS.setRate(+e.target.value);  if(rateLabel)  rateLabel.textContent = (+e.target.value).toFixed(1)+'x'; });
-        if (pitchSlider) pitchSlider.addEventListener('input', e => { IrisTTS.setPitch(+e.target.value); if(pitchLabel) pitchLabel.textContent = (+e.target.value).toFixed(1); });
+        const pitchLabel = document.getElementById('voice-pitch-label');
+        if (rateSlider) rateSlider.addEventListener('input', e => { IrisTTS.setRate(+e.target.value); if (rateLabel) rateLabel.textContent = (+e.target.value).toFixed(1) + 'x'; });
+        if (pitchSlider) pitchSlider.addEventListener('input', e => { IrisTTS.setPitch(+e.target.value); if (pitchLabel) pitchLabel.textContent = (+e.target.value).toFixed(1); });
 
         document.getElementById('btn-test-voice')?.addEventListener('click', () => IrisTTS.speak('Hola, esta es una prueba de Un Mundo en Silencio.'));
         // Logout — sin confirm(), directo
@@ -476,9 +480,9 @@ const IrisApp = {
         document.getElementById('toggle-flash')?.addEventListener('change', e => IrisNotifications.setFlashEnabled(e.target.checked));
         document.getElementById('vibration-pattern')?.addEventListener('change', e => IrisNotifications.setVibrationPattern(e.target.value));
         document.getElementById('btn-test-vibration')?.addEventListener('click', () => IrisNotifications.testVibration());
-        document.getElementById('btn-test-flash-msg')?.addEventListener('click',  () => IrisNotifications.testFlash('message'));
+        document.getElementById('btn-test-flash-msg')?.addEventListener('click', () => IrisNotifications.testFlash('message'));
         document.getElementById('btn-test-flash-warn')?.addEventListener('click', () => IrisNotifications.testFlash('warning'));
-        document.getElementById('btn-test-flash-emg')?.addEventListener('click',  () => IrisNotifications.testFlash('emergency'));
+        document.getElementById('btn-test-flash-emg')?.addEventListener('click', () => IrisNotifications.testFlash('emergency'));
 
         // Audio monitor
         document.getElementById('btn-toggle-mic')?.addEventListener('click', async () => {
@@ -540,4 +544,4 @@ const IrisApp = {
 // BOOTSTRAP
 // ——————————————————————————————————————
 document.addEventListener('DOMContentLoaded', () => IrisApp.init());
-document.addEventListener('deviceready',      () => console.log('📱 Cordova ready'), false);
+document.addEventListener('deviceready', () => console.log('📱 Cordova ready'), false);

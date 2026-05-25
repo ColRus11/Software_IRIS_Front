@@ -1,0 +1,203 @@
+<div id="page-avatar" class="ds-page">
+    <div class="ds-content">
+
+        <section style="margin-bottom:1.5rem;">
+            <h2 class="ds-section-title">Avatar LSC</h2>
+            <p style="font-size:0.875rem;color:var(--c-on-surf-var);">Escribe o di una letra para ver la seña en Lengua
+                de Señas Colombiana.</p>
+        </section>
+
+        <!-- Input + Mic -->
+        <div class="ds-card" style="margin-bottom:1rem;">
+            <div style="display:flex;gap:12px;align-items:center;">
+                <input id="avatar-letra-input" type="text" maxlength="10" placeholder="Escribe una Palabra"
+                    style="flex:1;height:48px;border-radius:0.75rem;border:1.5px solid var(--c-outline-var);background:var(--c-surface-high);padding:0 1rem;font-size:1.125rem;font-family:var(--font-body);color:var(--c-primary);text-transform:uppercase;outline:none;">
+                <button id="avatar-btn-mic"
+                    style="width:48px;height:48px;border-radius:50%;border:1.5px solid var(--c-outline-var);background:var(--c-surface-high);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;"
+                    title="Activar micrófono">
+                    <span class="material-symbols-outlined" style="color:var(--c-primary);">mic</span>
+                </button>
+            </div>
+            <div style="display:flex;align-items:baseline;gap:8px;margin-top:0.75rem;min-height:28px;">
+                <span id="avatar-letra-display"
+                    style="font-size:2.5rem;font-weight:900;font-family:var(--font-headline);color:var(--c-primary);line-height:1;"></span>
+                <span id="avatar-nombre-seña" style="font-size:0.8125rem;color:var(--c-on-surf-var);"></span>
+                <span id="avatar-mic-status" style="font-size:0.75rem;color:var(--c-error);margin-left:auto;"></span>
+            </div>
+        </div>
+
+        <!-- Canvas 3D -->
+        <div class="ds-card"
+            style="padding:0;overflow:hidden;margin-bottom:1rem;position:relative;background:var(--c-surface-high);">
+            <div id="avatar-lottie" style="width:100%;height:360px;"></div>
+            <div id="avatar-empty-state"
+                style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;pointer-events:none;">
+                <span class="material-symbols-outlined"
+                    style="font-size:48px;color:var(--c-outline);opacity:0.4;">sign_language</span>
+                <p style="font-size:0.875rem;color:var(--c-on-surf-var);margin:0;">Ingresa una letra para ver la seña
+                </p>
+            </div>
+        </div>
+
+        <!-- Letras grid -->
+        <!-- <div class="ds-card">
+            <p
+                style="font-size:0.75rem;color:var(--c-outline);text-transform:uppercase;letter-spacing:.06em;margin-bottom:0.75rem;">
+                Letras disponibles</p>
+            <div id="avatar-letras-grid" style="display:flex;flex-wrap:wrap;gap:6px;"></div>
+        </div> -->
+
+        <div class="ds-card" style="margin-bottom:1rem;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem;">
+                <span style="font-size:0.8125rem;color:var(--c-on-surf-var);">Velocidad</span>
+                <span id="avatar-speed-label"
+                    style="font-size:0.8125rem;font-weight:600;color:var(--c-primary);">1.0x</span>
+            </div>
+            <input id="avatar-speed-slider" type="range" min="0.5" max="2" step="0.1" value="1"
+                style="width:100%;accent-color:var(--c-primary);">
+        </div>
+
+    </div>
+</div>
+
+<script>
+    (function () {
+
+        const SEÑAS = {
+            A: { desc: 'Puño cerrado, pulgar al lado', dedos: [0, 0, 0, 0, 0], pulgar: 'lado' },
+            E: { desc: 'Dedos doblados, pulgar bajo dedos', dedos: [0.6, 0.6, 0.6, 0.6, 0.6], pulgar: 'bajo' },
+            I: { desc: 'Meñique extendido', dedos: [0, 0, 0, 0, 1], pulgar: 'lado' },
+            O: { desc: 'Dedos y pulgar forman O', dedos: [0.5, 0.5, 0.5, 0.5, 0.5], pulgar: 'frente' },
+            U: { desc: 'Índice y medio extendidos juntos', dedos: [0, 1, 1, 0, 0], pulgar: 'lado' },
+            B: { desc: '4 dedos juntos extendidos', dedos: [0, 1, 1, 1, 1], pulgar: 'bajo' },
+            C: { desc: 'Mano en forma de C', dedos: [0.4, 0.4, 0.4, 0.4, 0.4], pulgar: 'frente' },
+            D: { desc: 'Índice arriba, otros doblan', dedos: [0, 1, 0, 0, 0], pulgar: 'frente' },
+            F: { desc: 'Índice y pulgar se tocan', dedos: [0, 0, 1, 1, 1], pulgar: 'frente' },
+            L: { desc: 'Índice arriba, pulgar extendido', dedos: [0, 1, 0, 0, 0], pulgar: 'ext' },
+            M: { desc: '3 dedos sobre pulgar', dedos: [0.7, 0.7, 0.7, 0, 0], pulgar: 'bajo' },
+            N: { desc: '2 dedos sobre pulgar', dedos: [0.7, 0.7, 0, 0, 0], pulgar: 'bajo' },
+            S: { desc: 'Puño con pulgar sobre dedos', dedos: [0, 0, 0, 0, 0], pulgar: 'enc' },
+            V: { desc: 'Índice y medio en V', dedos: [0, 1, 1, 0, 0], pulgar: 'lado' },
+            Y: { desc: 'Pulgar y meñique extendidos', dedos: [0, 0, 0, 0, 1], pulgar: 'ext' },
+        };
+
+        const TODOS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+        const SKIN = 0xf5c5a3;
+        const SKIN_D = 0xe8a87c;
+
+        let scene, camera, renderer, handGroup;
+        let threeReady = false;
+
+        function mostrarLetra(letra, onTerminado) {
+            letra = letra.toUpperCase();
+            const config = SEÑAS[letra] || { desc: 'Seña en desarrollo' };
+
+            document.getElementById('avatar-empty-state').style.display = 'none';
+            document.getElementById('avatar-letra-display').textContent = letra;
+            document.getElementById('avatar-nombre-seña').textContent = '— ' + config.desc;
+
+            const LETRAS_LOTTIE = ['A', 'M', 'O', 'R', 'S'];
+            const archivo = LETRAS_LOTTIE.includes(letra) ? letra : 'X';
+            const container = document.getElementById('avatar-lottie');
+            container.innerHTML = '';
+
+            const anim = lottie.loadAnimation({
+                container: container,
+                renderer: 'svg',
+                loop: false,
+                autoplay: true,
+                path: 'img/lotties/' + archivo + '.json'
+            });
+
+            anim.addEventListener('complete', () => {
+                if (onTerminado) onTerminado();
+            });
+        }
+
+        function mostrarPalabra(palabra) {
+            const letras = palabra.toUpperCase().replace(/[^A-Z]/g, '').split('');
+            if (!letras.length) return;
+
+            let i = 0;
+            function siguiente() {
+                if (i >= letras.length) return;
+                mostrarLetra(letras[i], () => {
+                    i++;
+                    siguiente();
+                });
+            }
+            siguiente();
+        }
+
+        function setupGrid() {
+            const grid = document.getElementById('avatar-letras-grid');
+            if (!grid) return;
+            TODOS.forEach(l => {
+                const btn = document.createElement('button');
+                btn.className = 'avatar-letra-btn';
+                btn.dataset.letra = l;
+                btn.textContent = l;
+                btn.style.cssText = 'width:34px;height:34px;font-size:0.8125rem;font-weight:600;border-radius:0.5rem;border:1.5px solid var(--c-outline-var);background:var(--c-surface-high);color:var(--c-primary);cursor:pointer;font-family:var(--font-body);';
+                btn.addEventListener('click', () => {
+                    document.getElementById('avatar-letra-input').value = l;
+                    mostrarLetra(l);
+                });
+                grid.appendChild(btn);
+            });
+        }
+
+        function setupInput() {
+            const input = document.getElementById('avatar-letra-input');
+            if (!input) return;
+            input.addEventListener('input', e => {
+                const v = e.target.value.replace(/[^a-zA-Z]/g, '').toUpperCase();
+                e.target.value = v;
+                if (v) mostrarPalabra(v);
+            });
+        }
+
+        function setupMic() {
+            const btn = document.getElementById('avatar-btn-mic');
+            const status = document.getElementById('avatar-mic-status');
+            if (!btn) return;
+
+            if (!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) {
+                btn.disabled = true;
+                btn.style.opacity = '0.4';
+                btn.title = 'Micrófono no disponible en este navegador';
+                return;
+            }
+
+            const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+            const recog = new SR();
+            recog.lang = 'es-CO';
+            recog.interimResults = false;
+            recog.maxAlternatives = 1;
+
+            let recognizing = false;
+
+            recog.onstart = () => { recognizing = true; status.textContent = '🔴 Escuchando...'; btn.querySelector('.material-symbols-outlined').textContent = 'mic_off'; };
+            recog.onend = () => { recognizing = false; status.textContent = ''; btn.querySelector('.material-symbols-outlined').textContent = 'mic'; };
+            recog.onerror = () => { recognizing = false; status.textContent = ''; btn.querySelector('.material-symbols-outlined').textContent = 'mic'; };
+            recog.onresult = e => {
+                const txt = e.results[0][0].transcript.trim().toUpperCase();
+                const letra = txt.charAt(0);
+                if (/[A-Z]/.test(letra)) {
+                    document.getElementById('avatar-letra-input').value = letra;
+                    mostrarLetra(letra);
+                }
+            };
+
+            btn.addEventListener('click', () => { if (recognizing) recog.stop(); else recog.start(); });
+        }
+
+        function init() {
+            setupGrid();
+            setupInput();
+            setupMic();
+        }
+
+        setTimeout(init, 100);
+
+    })();
+</script>
