@@ -1554,27 +1554,29 @@ body.iris-focus-active .iris-bottom-nav {
     pointer-events: none;
 }
 
-body.iris-focus-active .iris-content {
-    padding-top: 16px;
-    padding-bottom: 16px;
-    max-width: 100%;
+/* === Historia: Resaltado de Conceptos === */
+mark {
+    background-color: #FFF59D; /* Light yellow background */
+    color: var(--iris-text);
+    padding: 0 4px;
+    border-radius: 4px;
+    font-weight: 600;
 }
 
-body.iris-focus-active .iris-question-form {
-    font-size: 1.1em;
+[data-theme="dark"] mark {
+    background-color: #FBC02D;
+    color: #121212;
 }
 
-body.iris-focus-active .iris-question-form__textarea {
-    min-height: 200px;
-    font-size: 1.2em;
+[data-theme="high-contrast"] mark {
+    background-color: #FFFF00;
+    color: #000000;
+    outline: 2px solid #000000;
 }
 
-body.iris-focus-active .iris-focus-exit-btn {
-    display: flex !important;
-}
 
-/* Hide non-essential elements in focus mode */
-body.iris-focus-active .iris-greeting,
-body.iris-focus-active .iris-dashboard__badge-soon {
-    display: none;
-}
+
+
+
+
+

@@ -280,6 +280,54 @@ const IrisApp = {
         const text = IrisTranscription.currentTranscript.trim();
         if (!text) { this.showToast('ℹ️ Nada que guardar aún'); return; }
         
+        // Detener transcripción si está activa para evitar sobreescribir el resultado visual
+        if (this._transcribing) {
+            this.toggleTranscription();
+        }
+        
+        // UI feedback
+        const btn = document.querySelector('button[onclick="IrisApp.saveTranscript()"]');
+        const origText = btn ? btn.innerHTML : '';
+        if (btn) {
+            btn.disabled = true;
+            btn.innerHTML = '<span class="material-symbols-outlined" style="animation: spin 1s linear infinite;">sync</span> Resaltando...';
+        }
+
+        let finalHtmlToDisplay = text;
+        
+        try {
+            const sessionName = `Transcripción ${new Date().toLocaleString('es-CO')}`;
+            const uid = IrisAuth.currentUser?.uid || 'anonymous';
+            
+            // Llamar a la API para guardar y obtener el texto resaltado
+            const response = await IrisAPI.createTranscription({
+                teacher_uid: uid,
+                session_name: sessionName,
+                transcript: text
+            });
+
+            if (response && response.highlighted_transcript) {
+                finalHtmlToDisplay = response.highlighted_transcript;
+                this.showToast('✅ Conceptos resaltados exitosamente');
+            } else {
+                this.showToast('✅ Transcripción guardada (sin resaltado)');
+            }
+        } catch (err) {
+            console.error('Error saving to backend:', err);
+            this.showToast('❌ Error en servidor. Guardando localmente...');
+        } finally {
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = origText;
+            }
+        }
+
+        // Actualizar la interfaz con el texto (resaltado o crudo)
+        const textEl = document.getElementById('transcript-text');
+        if (textEl) {
+            textEl.innerHTML = finalHtmlToDisplay;
+        }
+
         const isMobileCordova = window.cordova && ['ios', 'android'].includes(window.cordova.platformId);
         
         if (isMobileCordova) {
@@ -287,7 +335,7 @@ const IrisApp = {
             const localTranscripts = JSON.parse(localStorage.getItem('iris_local_transcripts') || '[]');
             localTranscripts.unshift({
                 id: Date.now(),
-                text: text,
+                text: text, // Guardar el texto sin HTML para evitar problemas de renderizado en el historial local
                 created_at: new Date().toISOString()
             });
             localStorage.setItem('iris_local_transcripts', JSON.stringify(localTranscripts));
@@ -311,7 +359,7 @@ const IrisApp = {
                 document.body.removeChild(a);
                 URL.revokeObjectURL(url);
                 
-                this.showToast('✅ Transcripción guardada (Archivo .txt)');
+                this.showToast('✅ Archivo .txt descargado');
             } catch (err) {
                 console.error('Error generando archivo:', err);
                 this.showToast('❌ Error al generar el archivo');
